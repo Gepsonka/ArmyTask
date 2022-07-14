@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header %}
+<title>CarDatabase | Registration</title>
+{% endblock header %}
+
+{% block content %}
+<main class="container p-3">
+    <form action="POST">
+        <div class="form-group"></div>
+            {% csrf_token %}
+            <legend class="text-center">Join us!</legend>
+            <fieldset>
+                {{ form | crispy}}
+            </fieldset>
+            
+                <button class="btn btn-outline-info mr-2" type="submit">Register</button>
+            </div>
+        <span>  Already have and account? <a href="{% url 'login' %}">Login</a>.</span>
+    </form>
+    
+    
+</main>
+
+{% endblock content %}

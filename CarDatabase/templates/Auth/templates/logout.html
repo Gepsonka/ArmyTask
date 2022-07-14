@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header %}
+<title>CarDatabase | Logged out</title>
+{% endblock header %}
+
+
+{% block content %}
+<main class="d-flex align-items-center" style="height:100vh"> 
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 mx-auto">
+                <div class="card">
+                    <div class="card-header text-center">
+                        You have been logged out.
+                    </div>
+                    <div class="card-body">
+                        <span>You can log back in <a href="{% url 'login' %}">here</a>.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</main>
+{% endblock content %}
