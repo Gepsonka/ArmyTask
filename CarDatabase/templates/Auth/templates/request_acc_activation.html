@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header %}
+<title>CarDatabase | Login</title>
+{% endblock header %}
+
+
+{% block content %}
+<main class="d-flex align-items-center" style="height:100vh"> 
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 mx-auto">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Retreive account
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == "error" %}
+                        <div class="alert alert-danger m-1">
+                            {{message}}
+                        </div>
+                        {% else %}
+                        <div class="alert {% if message.tags %}alert-{{message.tags}}{% endif %} m-1">
+                            {{message}}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <fieldset class="form-group">
+                                {{ form|crispy }}
+                            </fieldset>
+                            <div class="form-group">
+                                <button class="btn btn-outline-info" type="submit">Retreive account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</main>
+{% endblock content %}

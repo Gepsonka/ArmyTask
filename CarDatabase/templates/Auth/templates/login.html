@@ -16,6 +16,19 @@
                         Log In
                     </div>
                     <div class="card-body">
+                        {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == "error" %}
+                        <div class="alert alert-danger m-1">
+                            {{message}}
+                        </div>
+                        {% else %}
+                        <div class="alert {% if message.tags %}alert-{{message.tags}}{% endif %} m-1">
+                            {{message}}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
                         <form method="POST">
                             {% csrf_token %}
                             <fieldset class="form-group">
