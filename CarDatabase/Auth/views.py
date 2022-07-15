@@ -1,3 +1,4 @@
+from cmath import exp
 from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -5,7 +6,8 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from CustomUser.forms import UserRegisterForm
 from CustomUser.models import CustomUser
-from Auth.models import UserActivationRequestModel
+from Auth.models import AccountActivationRequestModel
+from .froms import AccountRetrieveForm
 
 # Create your views here.
 
@@ -30,7 +32,8 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
         
-    
+    # We only process data if the request method is POST
+    # else we just render the page
     if request.method == 'POST':
         form = AuthenticationForm(request.POST)
         username = request.POST['username']
@@ -57,13 +60,22 @@ def login_view(request):
             return redirect('home')
         
         else:
-            user = CustomUser.objects.get(username = username)
+            # If the user with the given username does not exists
+            # make user None
+            # Required because if the CustomUser.objects.get(username = username) query
+            # does not find the object it raises an error
+            try:
+                user = CustomUser.objects.get(username = username)
+            except:
+                user = None
             
-            if user.is_superuser or user.is_staff:
-                messages.warning(request, f'Admins cannot log in here.')
-                return render(request, 'Auth/templates/login.html', {'form': form})
             
             if user is not None:
+                # Admins cannot use this page to log in
+                if user.is_superuser or user.is_staff:
+                    messages.warning(request, f'Admins cannot log in here.')
+                    return render(request, 'Auth/templates/login.html', {'form': form})
+                
                 # If the user can be identified by username after an unsuccessful login
                 # increase the number of unsuccessful logins of the user and send a message
                 user.unsuccessful_attempts += 1
@@ -80,8 +92,19 @@ def login_view(request):
                     if user.is_active:
                         user.is_active = False
                         user.save()
-                    messages.error(request, "Your account has been locked. Request to unlock.")
-                    return render(request, 'Auth/templates/login.html', {'form': form})
+                    
+                    try:
+                        activation_request = AccountActivationRequestModel.objects.get(user=user)
+                    except:
+                        activation_request = None
+                    
+                    # If the user already sent a request we inform him/her about it
+                    if activation_request is None:
+                        messages.error(request, "Your account has been locked. Request to unlock.")
+                        return render(request, 'Auth/templates/login.html', {'form': form})
+                    else:
+                        messages.error(request, "You have requested to unlock your account. Wait till the admins unlock it")
+                        return render(request, 'Auth/templates/login.html', {'form': form})
 
             else:
                 # If the user cannot be identified then just return a message
@@ -91,39 +114,46 @@ def login_view(request):
         form = AuthenticationForm()
         
     return render(request, 'Auth/templates/login.html', {'form': form})
+
+
     
 def request_account_retrieve_view(request):
+    # if the user is already authenticated redirect to the home page
     if request.user.is_authenticated:
         return redirect('home')
     
     if request.method == 'POST':
-        form = AuthenticationForm(request.POST)
+        form = AccountRetrieveForm(request.POST)
         username = request.POST['username']
-        password = request.POST['password']
         
-        prop_user = CustomUser.objects.get(username = username)
-        if prop_user is not None:
-            prop_user
+        try:
+            current_user = CustomUser.objects.get(username=username)
+        except:
+            current_user = None
         
-        user = authenticate(username=username, password=password)
         
-        if user is not None:
-            if user.is_superuser or user.is_staff:
+        if current_user is not None:
+            if current_user.is_superuser or current_user.is_staff:
                 messages.warning(request, "Admins cannot retreive accounts.")
                 return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
             
             # If the account is active do nothing and inform the user
-            if user.is_active:
+            if current_user.is_active:
                 messages.info(request, "Account is active.")
                 return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
             else:
-                user_request = UserActivationRequestModel.objects.get(user=user)
+                try:
+                    user_request = AccountActivationRequestModel.objects.get(user=current_user)
+                except:
+                    user_request = None
+                    
                 # If the current user does not have a request, create one
                 # else inform the user that there is already an activation process is ongoing.
-                if user_request == None:
+                if user_request is None:
                     # Creating new request for the user to activate the account
-                    UserActivationRequestModel.objects.create(user=user).save()
+                    AccountActivationRequestModel.objects.create(user=current_user).save()
                     messages.success(request, 'You have successfully requested account activation. Wait for the activation from the admins.')
+                    form = AccountRetrieveForm()
                     return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
                 else:
                     messages.info(request, 'Your account is already waiting for activation!')
@@ -133,6 +163,6 @@ def request_account_retrieve_view(request):
             return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
             
     else:
-        form = AuthenticationForm()
+        form = AccountRetrieveForm()
         
     return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})

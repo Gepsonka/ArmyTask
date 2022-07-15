@@ -9,3 +9,10 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return self.first_name + ' ' + self.last_name
+    
+    
+class AccountDeleteRequestModel(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.user.first_name + " " + self.user.last_name + "'s request for delete"

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser, AccountDeleteRequestModel
 from .forms import UserRegisterForm
 
 
@@ -10,5 +10,7 @@ class CustomUserAdmin(UserAdmin):
 #    form = CustomUserChangeForm
     model = CustomUser
     list_display = ["email", "username"]
+    
+
 
 admin.site.register(CustomUser, CustomUserAdmin)
