@@ -2,9 +2,9 @@
 
 {% block admin-content %}
 <main style="min-height: 100vh;">
-    <form class="form-field" action="{% url 'admin-user-delete-action' user.id %}" method="POST">
+    <form class="form-field" action="{% url 'admin-user-unlock-all-action' %}" method="POST">
         {% csrf_token %}
-        <input class="btn btn-default btn-danger" type="submit" value="Delete all requested"/>
+        <input class="btn btn-default btn-warning" type="submit" value="Unlock all"/>
     </form>
     <table class="table">
         <thead>
@@ -13,19 +13,19 @@
                 <th>First name</th>
                 <th>Last name</th>
                 <th>Email</th>
-                <th>Delete User</th>
+                <th>Unlock User</th>
             </tr>
         </thead>
-        {% for user in delete_request_users %}
-        <tr class="table-danger">
+        {% for user in unlock_request_users %}
+        <tr class="table-warning">
             <td>{{ user.username }}</td>
             <td>{{ user.first_name }}</td>
             <td>{{ user.last_name }}</td>
             <td>{{ user.email }}</td>
             <td>
-                <form class="form-field" action="{% url 'admin-user-delete-action' user.id %}" method="POST">
+                <form class="form-field" action="{% url 'admin-user-unlock-action' user.id %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                    <input class="btn btn-default btn-success" type="submit" value="&#10004;"/>
                 </form>
             </td>
         </tr>

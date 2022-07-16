@@ -7,7 +7,19 @@
 
 {% block content %}
 <main class="container p-3">
-    
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == "error" %}
+    <div class="alert alert-danger m-1">
+        {{message}}
+    </div>
+    {% else %}
+    <div class="alert {% if message.tags %}alert-{{message.tags}}{% endif %} m-1">
+        {{message}}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
 </main>
 
 {% endblock content %}

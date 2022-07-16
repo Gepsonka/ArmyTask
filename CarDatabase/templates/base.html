@@ -28,8 +28,8 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
                             <li><a class="dropdown-item" href="{% url 'admin-users' %}">Users</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-creation' %}">Create user</a></li>
-                            <li><a class="dropdown-item" href="#">Unlock requests</a></li>
-                            <li><a class="dropdown-item" href="#">Delete requests</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin-user-unlock' %}">Unlock requests</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin-user-delete' %}">Delete requests</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -61,11 +61,15 @@
                         <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'admin-login' %}">Admin Login</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'retrieve-account' %}">Request unlock</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
+                    
                     {% endif %}
                     
                 </ul>

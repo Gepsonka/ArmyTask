@@ -5,9 +5,9 @@ from django.contrib import messages
 from django.shortcuts import  redirect
 
 
+# Custom view access decorators
 
-
-def admin_user_required(redirect_url_name, message='Log in as admin first!'):
+def admin_required(redirect_url_name, message='Not permitted!'):
     """
     Decorator for view. Checks if the user is admin, if not redirects the user
     to redirect_url_name url and sends a message.
@@ -16,7 +16,42 @@ def admin_user_required(redirect_url_name, message='Log in as admin first!'):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if not request.user.is_superuser:
-                messages.error(request, message)
+                if message:
+                    messages.error(request, message)
+                return redirect(redirect_url_name)
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
+
+
+def not_admin_required(redirect_url_name, message='Admins cannot go there.'):
+    """
+    Decorator for view. Checks if the user is admin, if he is then redirects the user
+    to redirect_url_name url and sends a message.
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.is_superuser:
+                if message:
+                    messages.warning(request, message)
+                return redirect(redirect_url_name)
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
+
+
+def not_logged_in_required(redirect_url_name, message=''):
+    """
+    Decorator for view. Checks if the user is authenticated, if not redirects the user
+    to redirect_url_name url.
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.is_authenticated:
+                if message:
+                    messages.warning(request, message)
                 return redirect(redirect_url_name)
             return view_func(request, *args, **kwargs)
         return _wrapped_view

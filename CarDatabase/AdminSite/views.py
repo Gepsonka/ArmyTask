@@ -3,42 +3,27 @@ from django.shortcuts import render, redirect
 from CustomUser.models import CustomUser
 from django.contrib import messages
 from .forms import AdminUserCreationForm
-from CustomUser.decorators import admin_user_required
+from CustomUser.decorators import admin_required
+from django.contrib.auth.decorators import login_required
 
 
 
 # Create your views here.
-@admin_user_required('admin-login')
+
+@admin_required('home')
 def users_page_view(request):
-    # # If user is not authenticated redirect home
-    # if not request.user.is_authenticated:
-    #     messages.warning(request, 'Log in first as admin!')
-    #     return redirect('admin-login')
-
-    # # If user is not admin redirect to home
-    # if not request.user.is_staff and not request.user.is_superuser:
-    #     return redirect('home')
-
     # Return the lis of all users to the template
     all_users = CustomUser.objects.all()
     return render(request, 'AdminSite/templates/users.html', {'all_users': all_users})
 
-
+@admin_required('home')
 def user_creation_view(request):
-    '''View to create users by the admins. 
-    By default an admin can select any password se/he likes.
+    '''
+    View to create users by the admins. 
+    By default an admin can select any password she/he likes (validators are not applied).
     The view checks if there are any users with the same username or password,
-    if there is not any create a new user with the given credentials, else send error.'''
-
-    # If user is not authenticated redirect home
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Log in first as admin!')
-        return redirect('admin-login')
-
-    # If user is not admin redirect to home
-    if not request.user.is_staff and not request.user.is_superuser:
-        return redirect('home')
-    
+    if there is not any create a new user with the given credentials, else send error.
+    '''    
     if request.method=='POST':
         form = AdminUserCreationForm(request.POST)
         
@@ -78,45 +63,82 @@ def user_creation_view(request):
 
     return render(request, 'AdminSite/templates/admin_user_creation.html', {'form':form})
 
+@admin_required('home')
 def user_delete_page_view(request):
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Log in first as admin!')
-        return redirect('admin-login')
-
-    if not request.user.is_superuser and not request.user.is_staff:
-        return redirect('home')
-
     delete_request_users = CustomUser.objects.filter(requested_delete=True)
-
     return render(request, 'AdminSite/templates/admin_user_delete.html', {'delete_request_users': delete_request_users})
 
-
+@admin_required('home')
 def user_delete_view(request, id):
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Log in first as admin!')
-        return redirect('admin-login')
+    if request.method=='POST':
+        try:
+            CustomUser.objects.get(id=id).delete()
+            messages.success(request, 'User was successfully deleted')
 
-    if not request.user.is_superuser and not request.user.is_staff:
-        return redirect('home')
+            # Have to redirect back to the admin-users page bc otherwise
+            # it would not refresh the list
+            return redirect('admin-users')
+        except:
+            messages.error(request, "Error! User does not exists!")
+    return redirect('admin-users')
 
-    try:
-        CustomUser.objects.get(id=id).delete()
-        messages.success(request, 'User was successfully deleted')
+@admin_required('home')
+def user_delete_all_view(request):
+    if request.method=='POST':
+        CustomUser.objects.filter(requested_delete=True).delete()
+        messages.success(request, 'All requested deletion was successful.')
+    return redirect('admin-user-unlock')
 
-        # Have to redirect back to the admin-users page bc otherwise
-        # it would not refresh the list
-        return redirect('admin-users')
-    except:
-        messages.error(request, "Error! User does not exists!")
+@admin_required('home')
+def user_unlock_page_view(request):
+    unlock_request_users = CustomUser.objects.filter(requested_unlock=True)
+    return render(request, 'AdminSite/templates/admin_user_unlock.html', {'unlock_request_users': unlock_request_users})
 
-def user_unlock_view(request):
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Log in first as admin!')
-        return redirect('admin-login')
 
-    if not request.user.is_superuser and not request.user.is_staff:
-        return redirect('home')
-
+@admin_required('home')
+def user_unlock_view(request, id):
+    if request.method=='POST':
+        try:
+            # Activating the user
+            user = CustomUser.objects.get(id=id)
+            user.unsuccessful_attempts=0
+            user.is_active=True
+            user.requested_unlock=False
+            user.save()
+            messages.success(request, 'Account was successfully unlocked.')
+        except:
+            messages.error(request, "Error! User does not exists!")
     
+    return redirect('admin-user-unlock')
+
+@admin_required('home')
+def user_unlock_all_view(request):
+    if request.method=='POST':
+        CustomUser.objects.filter(requested_unlock=True).update(unsuccessful_attempts=0, is_active=True, requested_unlock=False)
+        messages.success(request, 'All account were successfully unlocked.')
+    return redirect('admin-user-unlock')
+
+@admin_required('home')
+def make_admin(request, id):
+    if request.method=='POST':
+        try:
+            user = CustomUser.objects.get(id=id)
+            user.is_superuser = True
+            user.save()
+            messages.success(request, 'Successfully added admin.')
+        except:
+            messages.error(request, "Error! User does not exists!")
+    return redirect('admin-users')
 
 
+@admin_required('home')
+def revoke_admin(request, id):
+    if request.method=='POST':
+        try:
+            user = CustomUser.objects.get(id=id)
+            user.is_superuser = False
+            user.save()
+            messages.success(request, 'Successfully revoked admin.')
+        except:
+            messages.error(request, "Error! User does not exists!")
+    return redirect('admin-users')

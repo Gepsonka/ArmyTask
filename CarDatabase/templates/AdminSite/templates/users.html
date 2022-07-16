@@ -15,6 +15,7 @@
                 <th>Is staff?</th>
                 <th>Is active?</th>
                 <th>Delete User</th>
+                <th>Give admin</th>
             </tr>
         </thead>
         {% for user in all_users %}
@@ -33,10 +34,23 @@
                 {% if user.is_active %} Yes {% else %} No {% endif %}
             </td>
             <td>
-                <form class="form-field" action="{% url 'admin-user-delete' user.id %}" method="POST">
+                <form class="form-field" action="{% url 'admin-user-delete-action' user.id %}" method="POST">
                     {% csrf_token %}
                     <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
                 </form>
+            </td>
+            <td>
+                {% if not user.is_superuser %}
+                <form class="form-field" action="{% url 'make-admin' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-primary" type="submit" value="&#10004;"/>
+                </form>
+                {% else %}
+                <form class="form-field" action="{% url 'revoke-admin' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                </form>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
