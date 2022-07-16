@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block header %}
-<title>CarDatabase | Login</title>
+<title>CarDatabase | Admin Login</title>
 {% endblock header %}
 
 
@@ -11,9 +11,9 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6 mx-auto">
-                <div class="card">
+                <div class="card text-white bg-dark">
                     <div class="card-header text-center">
-                        Log In
+                        Log In as Admin
                     </div>
                     <div class="card-body">
                         {% if messages %}
@@ -37,14 +37,11 @@
                             <div class="form-group">
                                 <button class="btn btn-outline-info" type="submit">Login</button>
                             </div>
-                            <span>Don't have and account? <a href="{% url 'register' %}">Register one</a>.</span>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    
 </main>
 {% endblock content %}

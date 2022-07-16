@@ -48,9 +48,22 @@ def login_view(request):
                 messages.warning(request, f'Admins cannot log in here.')
                 return render(request, 'Auth/templates/login.html', {'form': form})
             
-            
+            # If the user has reaches the max unsuccessful login attempts
+            # check if he/she has already asked for unlock and send a messsage
+            # according to the check
             if user.unsuccessful_attempts >= 5:
-                pass
+                try:
+                     activation_request = AccountActivationRequestModel.objects.get(user=user)
+                except:
+                    activation_request = None
+                
+                # If the user already sent a request we inform him/her about it
+                if activation_request is None:
+                    messages.error(request, "Your account has been locked. Request to unlock.")
+                    return render(request, 'Auth/templates/login.html', {'form': form})
+                else:
+                    messages.error(request, "You have requested to unlock your account. Wait till the admins unlock it")
+                    return render(request, 'Auth/templates/login.html', {'form': form})
             
             # Update unsuccessfull attempts to 0 after successful login
             user.unsuccessful_attempts = 0
@@ -118,6 +131,11 @@ def login_view(request):
 
     
 def request_account_retrieve_view(request):
+    '''
+    Here the user can ask for account unlock after reaching the max amount of
+    failed login attempts.
+    '''
+
     # if the user is already authenticated redirect to the home page
     if request.user.is_authenticated:
         return redirect('home')
@@ -153,7 +171,6 @@ def request_account_retrieve_view(request):
                     # Creating new request for the user to activate the account
                     AccountActivationRequestModel.objects.create(user=current_user).save()
                     messages.success(request, 'You have successfully requested account activation. Wait for the activation from the admins.')
-                    form = AccountRetrieveForm()
                     return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
                 else:
                     messages.info(request, 'Your account is already waiting for activation!')
