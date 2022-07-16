@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Auth.urls')),
     path('', include('CarData.urls')),
-    path('custom-admin/', include('AdminAuth.urls')),
+    path('custom-admin-auth/', include('AdminAuth.urls')),
+    path('admin-sites/', include('AdminSite.urls')),
 ]

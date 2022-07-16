@@ -6,7 +6,6 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from CustomUser.forms import UserRegisterForm
 from CustomUser.models import CustomUser
-from Auth.models import AccountActivationRequestModel
 from .froms import AccountRetrieveForm
 
 # Create your views here.
@@ -51,14 +50,9 @@ def login_view(request):
             # If the user has reaches the max unsuccessful login attempts
             # check if he/she has already asked for unlock and send a messsage
             # according to the check
-            if user.unsuccessful_attempts >= 5:
-                try:
-                     activation_request = AccountActivationRequestModel.objects.get(user=user)
-                except:
-                    activation_request = None
-                
+            if not user.is_active:                
                 # If the user already sent a request we inform him/her about it
-                if activation_request is None:
+                if not user.requested_unlock:
                     messages.error(request, "Your account has been locked. Request to unlock.")
                     return render(request, 'Auth/templates/login.html', {'form': form})
                 else:
@@ -106,13 +100,8 @@ def login_view(request):
                         user.is_active = False
                         user.save()
                     
-                    try:
-                        activation_request = AccountActivationRequestModel.objects.get(user=user)
-                    except:
-                        activation_request = None
-                    
                     # If the user already sent a request we inform him/her about it
-                    if activation_request is None:
+                    if not user.requested_unlock:
                         messages.error(request, "Your account has been locked. Request to unlock.")
                         return render(request, 'Auth/templates/login.html', {'form': form})
                     else:
@@ -160,16 +149,13 @@ def request_account_retrieve_view(request):
                 messages.info(request, "Account is active.")
                 return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
             else:
-                try:
-                    user_request = AccountActivationRequestModel.objects.get(user=current_user)
-                except:
-                    user_request = None
                     
                 # If the current user does not have a request, create one
                 # else inform the user that there is already an activation process is ongoing.
-                if user_request is None:
+                if not current_user.requested_unlock:
                     # Creating new request for the user to activate the account
-                    AccountActivationRequestModel.objects.create(user=current_user).save()
+                    current_user.requested_unlock = True
+                    current_user.save()
                     messages.success(request, 'You have successfully requested account activation. Wait for the activation from the admins.')
                     return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
                 else:

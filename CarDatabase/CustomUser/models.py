@@ -6,13 +6,10 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     unsuccessful_attempts = models.SmallIntegerField(default=0)
+    requested_delete = models.BooleanField(default=False)
+    requested_unlock = models.BooleanField(default=False)
     
     def __str__(self):
         return self.first_name + ' ' + self.last_name
     
     
-class AccountDeleteRequestModel(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return self.user.first_name + " " + self.user.last_name + "'s request for delete"

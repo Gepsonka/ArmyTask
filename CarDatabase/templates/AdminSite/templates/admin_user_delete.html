@@ -1,0 +1,32 @@
+{% extends 'AdminSite/templates/admin_site_base.html' %}
+
+{% block admin-content %}
+<main style="min-height: 100vh;">
+    <a class="btn btn-success" href="{% url 'admin-user-creation' %}">Create User</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Delete User</th>
+            </tr>
+        </thead>
+        {% for user in delete_request_users %}
+        <tr class="table-danger">
+            <td>{{ user.username }}</td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <form class="form-field" action="{% url 'admin-user-delete' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+{% endblock admin-content %}

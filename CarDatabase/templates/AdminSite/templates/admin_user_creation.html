@@ -1,0 +1,21 @@
+{% extends 'AdminSite/templates/admin_site_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<main class="container p-3" style="min-height: 100vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-sm-10">
+            <form method="POST">
+                <div class="form-group"></div>
+                    {% csrf_token %}
+                    <legend class="text-center">Create user</legend>
+                    <fieldset>
+                        {{ form | crispy}}
+                    </fieldset>
+                    <button class="btn btn-outline-info mr-2 my-2" type="submit">Create user</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock content %}
