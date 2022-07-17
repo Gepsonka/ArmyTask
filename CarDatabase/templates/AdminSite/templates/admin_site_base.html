@@ -10,7 +10,7 @@
   {% if messages %}
   {% for message in messages %}
   {% if message.tags == "error" %}
-  <div class="alert alert-danger m-1 mb-2">
+  <div class="alert alert-danger mb-2">
       {{message}}
   </div>
   {% else %}
@@ -20,8 +20,7 @@
   {% endif %}
   {% endfor %}
   {% endif %}
-  {% block admin-content %}
   
-  {% endblock admin-content %}
+  {% block admin-content %}{% endblock admin-content %}
 </main>
 {% endblock content %}

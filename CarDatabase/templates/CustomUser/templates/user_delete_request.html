@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header %}
+<title>CarDatabase | Login</title>
+{% endblock header %}
+
+
+{% block content %}
+<main class="d-flex align-items-center" style="height:100vh"> 
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 col-lg-4 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == "error" %}
+                        <div class="alert alert-danger">
+                            {{message}}
+                        </div>
+                        {% else %}
+                        <div class="alert {% if message.tags %}alert-{{message.tags}}{% endif %} m-1">
+                            {{message}}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not user.requested_delete %}
+                        <div class="card-title text-center bg-light">
+                            Are you sure want to request to delete your account?
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                Account cannot be recovered after delete.
+                            </div>
+                            <form method="POST" action="{% url 'user-delete-request-action' %}">
+                                {% csrf_token %}
+                                <input class="btn btn-default btn-outline-danger" type="submit" value="Request account delete"/>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="card-title">
+                            Do you want to keep your account?
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{% url 'user-delete-request-action' %}">
+                                {% csrf_token %}
+                                <input class="btn btn-default btn-outline-primary" type="submit" value="I am keeping my account."/>
+                            </form>
+                        </div>
+                        {% endif %}                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</main>
+{% endblock content %}
