@@ -33,18 +33,22 @@ def user_creation_view(request):
             try:
                 # If user does not exists thee xpression below throws
                 # an exeption so the user can be created
-                CustomUser.objects.get(username=form.cleaned_data.get('username'))
-                messages.error(request, 'User with the same username already exists!')
-                return render(request, 'AdminSite/templates/admin_user_creation.html', {'form':form})
+                user_by_username = CustomUser.objects.get(username=form.cleaned_data.get('username'))
             except:
-                pass
+                user_by_username = None
+
+            if user_by_username is not None:
+                messages.error(request, 'User with that username is already exists.')
+                return redirect('admin-users')
 
             try:
-                CustomUser.objects.get(email=form.cleaned_data.get('email'))
-                messages.error(request, 'User with the same email already exists!')
-                return render(request, 'AdminSite/templates/admin_user_creation.html', {'form':form})
+                user_by_email = CustomUser.objects.get(email=form.cleaned_data.get('email'))
             except:
-                pass
+                user_by_email = None
+
+            if user_by_email is not None:
+                messages.error(request, 'User with that email is already exists.')
+                return redirect('admin-users')
 
             CustomUser.objects.create_user(
                 username=form.cleaned_data.get('username'),
@@ -58,6 +62,7 @@ def user_creation_view(request):
             )
 
             messages.success(request, 'User created sucessfully.')
+            return redirect('admin-user-creation')
     else:
         form = AdminUserCreationForm()
 
@@ -125,7 +130,8 @@ def make_admin(request, id):
             user = CustomUser.objects.get(id=id)
             user.is_superuser = True
             user.save()
-            messages.success(request, 'Successfully added admin.')
+            username = user.username
+            messages.success(request, 'Successfully added admin privileges to ' + username)
         except:
             messages.error(request, "Error! User does not exists!")
     return redirect('admin-users')
@@ -138,7 +144,8 @@ def revoke_admin(request, id):
             user = CustomUser.objects.get(id=id)
             user.is_superuser = False
             user.save()
-            messages.success(request, 'Successfully revoked admin.')
+            username = user.username
+            messages.success(request, 'Successfully revoked admin privileges from ' + username)
         except:
             messages.error(request, "Error! User does not exists!")
     return redirect('admin-users')

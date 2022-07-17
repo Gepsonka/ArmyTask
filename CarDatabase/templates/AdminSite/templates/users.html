@@ -2,7 +2,6 @@
 
 
 {% block admin-content %}
-<main style="min-height: 100vh;">
     <a class="btn btn-success" href="{% url 'admin-user-creation' %}">Create User</a>
     <table class="table">
         <thead>
@@ -15,7 +14,7 @@
                 <th>Is staff?</th>
                 <th>Is active?</th>
                 <th>Delete User</th>
-                <th>Give admin</th>
+                <th>Admin</th>
             </tr>
         </thead>
         {% for user in all_users %}
@@ -43,17 +42,16 @@
                 {% if not user.is_superuser %}
                 <form class="form-field" action="{% url 'make-admin' user.id %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-primary" type="submit" value="&#10004;"/>
+                    <input class="btn btn-default btn-primary" type="submit" value="Add"/>
                 </form>
                 {% else %}
                 <form class="form-field" action="{% url 'revoke-admin' user.id %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                    <input class="btn btn-default btn-danger" type="submit" value="Revoke"/>
                 </form>
                 {% endif %}
             </td>
         </tr>
         {% endfor %}
     </table>
-</main>
 {% endblock admin-content %}
