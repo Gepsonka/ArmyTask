@@ -2,7 +2,7 @@ from email.utils import parseaddr
 from django.shortcuts import render, redirect
 from CustomUser.models import CustomUser
 from django.contrib import messages
-from .forms import AdminUserCreationForm
+from .forms import AdminUserForm
 from CustomUser.decorators import admin_required
 from django.contrib.auth.decorators import login_required
 
@@ -31,9 +31,8 @@ def user_creation_view(request):
     if there is not any create a new user with the given credentials, else send error message.
     '''    
     if request.method == 'POST':
-        form = AdminUserCreationForm(request.POST)
+        form = AdminUserForm(request.POST)
         
-
         if form.is_valid():
             # Check if user with the same username or email exists
             try:
@@ -62,16 +61,59 @@ def user_creation_view(request):
                 email=form.cleaned_data.get('email'),
                 password=form.cleaned_data.get('password'),
                 is_active=form.cleaned_data.get('is_active'),
-                is_staff=form.cleaned_data.get('is_staff'),
                 is_superuser=form.cleaned_data.get('is_superuser')
             )
 
             messages.success(request, 'User created sucessfully.')
             return redirect('admin-users')
     else:
-        form = AdminUserCreationForm()
+        form = AdminUserForm()
 
     return render(request, 'AdminSite/templates/admin_user_creation.html', {'form':form})
+
+
+@admin_required('home')
+def user_update_page_view(request, id):
+    try:
+        user_update = CustomUser.objects.get(id=id)
+    except:
+        messages.error(request, 'Error! Could not update account because the account does not exist.')
+        return redirect('admin-users')
+
+    if request.method == 'POST':
+        form = AdminUserForm(request.POST)
+
+        if form.is_valid():
+            user_update.username=form.cleaned_data.get('username'),
+            user_update.first_name=form.cleaned_data.get('first_name'),
+            user_update.last_name=form.cleaned_data.get('last_name'),
+            user_update.email=form.cleaned_data.get('email'),
+            user_update.is_active=form.cleaned_data.get('is_active'),
+            user_update.is_superuser=form.cleaned_data.get('is_superuser')
+
+            # Updating password (only if not empty)
+            if form.cleaned_data.get('password') == '':
+                user_update.set_password(form.cleaned_data.get('password'))
+            
+
+        messages.success(request, form.cleaned_data.get('username') + 'was successfully updated!')
+        return redirect('admin-users')
+
+    else:
+        # If the page is requested we display the account's current credentials.
+        form = AdminUserForm(initial={
+            'username': user_update.username,
+            'first_name': user_update.first_name,
+            'last_name': user_update.last_name,
+            'email': user_update.email,
+            'password': '',
+            'is_active': user_update.is_active,
+            'is_superuser': user_update.is_superuser
+        })
+
+    return render(request, 'AdminSite/templates/admin_user_update.html', {'form':form, 'current_user':user_update})
+
+
 
 @admin_required('home')
 def user_delete_page_view(request):

@@ -14,6 +14,7 @@ class CarTypesModel(models.Model):
     name = models.CharField(unique=True, max_length=100)
 
 class FavouriteCarsModel(models.Model):
+    '''User can select favourite cars from the available models'''
     car_type = models.ForeignKey(CarTypesModel, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     year = models.PositiveIntegerField()
