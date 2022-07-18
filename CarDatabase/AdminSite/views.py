@@ -2,10 +2,19 @@ from email.utils import parseaddr
 from django.shortcuts import render, redirect
 from CustomUser.models import CustomUser
 from django.contrib import messages
-from .forms import AdminUserForm
+from .forms import AdminUserForm, AdminUserUpdateForm
 from CustomUser.decorators import admin_required
 from django.contrib.auth.decorators import login_required
 
+def username_is_exists(username):
+    if len(CustomUser.objects.filter(username=username)) == 1:
+        return True
+    return False
+
+def email_is_exists(email):
+    if len(CustomUser.objects.filter(email=email)) == 1:
+        return True
+    return False
 
 
 # Create your views here.
@@ -35,25 +44,15 @@ def user_creation_view(request):
         
         if form.is_valid():
             # Check if user with the same username or email exists
-            try:
-                # If the user exists thee expression below throws
-                # an exeption so the user can be created
-                user_by_username = CustomUser.objects.get(username=form.cleaned_data.get('username'))
+            if username_is_exists(form.cleaned_data.get('username')):
                 messages.error(request, 'User with that username is already exists.')
-                return redirect('admin-users')
-            except:
-                pass
+                return redirect('admin-user-creation')
 
-            try:
-                # If the user exists the expression below throws
-                # an exeption so a new user can be created
+            if email_is_exists(form.cleaned_data.get('email')):
                 user_by_email = CustomUser.objects.get(email=form.cleaned_data.get('email'))
                 messages.error(request, 'User with that email is already exists.')
-                return redirect('admin-users')
-            except:
-                pass
+                return redirect('admin-user-creation')
                 
-
             CustomUser.objects.create_user(
                 username=form.cleaned_data.get('username'),
                 first_name=form.cleaned_data.get('first_name'),
@@ -66,6 +65,11 @@ def user_creation_view(request):
 
             messages.success(request, 'User created sucessfully.')
             return redirect('admin-users')
+        
+        else:
+            messages.error(request, 'Unknown error! Account could not be created.')
+            return redirect('admin-users')
+
     else:
         form = AdminUserForm()
 
@@ -74,6 +78,9 @@ def user_creation_view(request):
 
 @admin_required('home')
 def user_update_page_view(request, id):
+    '''
+    Account update view for the admins.    
+    '''
     try:
         user_update = CustomUser.objects.get(id=id)
     except:
@@ -81,27 +88,55 @@ def user_update_page_view(request, id):
         return redirect('admin-users')
 
     if request.method == 'POST':
-        form = AdminUserForm(request.POST)
+        form = AdminUserUpdateForm(request.POST)
 
         if form.is_valid():
-            user_update.username=form.cleaned_data.get('username'),
-            user_update.first_name=form.cleaned_data.get('first_name'),
-            user_update.last_name=form.cleaned_data.get('last_name'),
-            user_update.email=form.cleaned_data.get('email'),
-            user_update.is_active=form.cleaned_data.get('is_active'),
-            user_update.is_superuser=form.cleaned_data.get('is_superuser')
 
-            # Updating password (only if not empty)
-            if form.cleaned_data.get('password') == '':
-                user_update.set_password(form.cleaned_data.get('password'))
+            # We update an attribute only if the formfield was not empty
+            # If a formfield left empty we don't update the related value in the db
+            # For the email and username the server has to check if there is already
+            # an account with the same username or email
+            if form.cleaned_data.get('username') != '' and user_update.username != form.cleaned_data.get('username'):
+                if username_is_exists(form.cleaned_data.get('username')):
+                    messages.error(request, 'Account with this username already exists!')
+                    return redirect('admin-user-update', user_update.id)
+                else:
+                    user_update.username = form.cleaned_data.get('username')
+
+            if form.cleaned_data.get('first_name') != '':
+                user_update.first_name = form.cleaned_data.get('first_name')
             
+            if form.cleaned_data.get('last_name') != '':
+                user_update.last_name = form.cleaned_data.get('last_name')
+            
+            if form.cleaned_data.get('email') != '' and user_update.email != form.cleaned_data.get('email'):
+                if email_is_exists(form.cleaned_data.get('email')):
+                    messages.error(request, 'Account with this email already exists!')
+                    return redirect('admin-user-update', user_update.id)
+                else:
+                    user_update.email = form.cleaned_data.get('email')
+                
+            if form.cleaned_data.get('password') != '':
+                # set_password does the hashing and password update
+                user_update.set_password(form.cleaned_data.get('password'))
 
-        messages.success(request, form.cleaned_data.get('username') + 'was successfully updated!')
-        return redirect('admin-users')
+            user_update.is_active = form.cleaned_data.get('is_active')
 
+            user_update.is_superuser = form.cleaned_data.get('is_superuser')
+
+            user_update.save()
+
+            messages.success(request, user_update.username + ' was successfully updated!')
+            return redirect('admin-users')
+        
+        else:
+            messages.error(request, 'Unknown error! Account could not be updated.')
+            return redirect('admin-users')
+    
     else:
-        # If the page is requested we display the account's current credentials.
-        form = AdminUserForm(initial={
+        # If the page is requested we display the account's current credentials,
+        # except the password.
+        form = AdminUserUpdateForm(initial={
             'username': user_update.username,
             'first_name': user_update.first_name,
             'last_name': user_update.last_name,
@@ -110,6 +145,7 @@ def user_update_page_view(request, id):
             'is_active': user_update.is_active,
             'is_superuser': user_update.is_superuser
         })
+
 
     return render(request, 'AdminSite/templates/admin_user_update.html', {'form':form, 'current_user':user_update})
 
@@ -121,7 +157,7 @@ def user_delete_page_view(request):
     On this page the admins can delete users wether
     clicking on the Delete all: this deletes all the users who
     requested it
-    or the X button at the end of each row which deletes one user.
+    or the X button at the end of each row on the users page which deletes one user.
     '''
     delete_request_users = CustomUser.objects.filter(requested_delete=True)
     return render(request, 'AdminSite/templates/admin_user_delete.html', {'delete_request_users': delete_request_users})
@@ -140,6 +176,7 @@ def user_delete_view(request, id):
             return redirect('admin-users')
         except:
             messages.error(request, "Error! User does not exists!")
+
     return redirect('admin-users')
 
 @admin_required('home')
@@ -155,7 +192,8 @@ def user_unlock_page_view(request):
     '''
     Displays the users who requested unlock.
     Users can be unlocked with the button at the end of each row, it unlocks one account
-    or with the Unlock all button which unlocks all accounts who requested.
+    or with the Unlock all button on the admin-user-unlock-all-action page 
+    which unlocks all accounts who requested.
     '''
     unlock_request_users = CustomUser.objects.filter(requested_unlock=True)
     return render(request, 'AdminSite/templates/admin_user_unlock.html', {'unlock_request_users': unlock_request_users})
@@ -185,7 +223,7 @@ def user_unlock_view(request, id):
 
 @admin_required('home')
 def user_unlock_all_view(request):
-    '''Unlocks all accounts who requested an unlock.'''
+    '''Unlocks all accounts which requested an unlock.'''
     if request.method=='POST':
         CustomUser.objects.filter(requested_unlock=True).update(unsuccessful_attempts=0, is_active=True, requested_unlock=False)
         messages.success(request, 'All account were successfully unlocked.')
@@ -193,7 +231,7 @@ def user_unlock_all_view(request):
 
 @admin_required('home')
 def make_admin(request, id):
-    '''Makes admin from a user.'''
+    '''Makes admin from an account.'''
     if request.method=='POST':
         try:
             user = CustomUser.objects.get(id=id)
@@ -213,6 +251,7 @@ def make_admin(request, id):
 
 @admin_required('home')
 def revoke_admin(request, id):
+    '''Revokes admin privileges from an account'''
     if request.method=='POST':
         try:
             user = CustomUser.objects.get(id=id)

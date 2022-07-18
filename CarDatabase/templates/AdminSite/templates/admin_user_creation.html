@@ -4,7 +4,8 @@
 {% block content %}
 <main style="min-height: 100vh;">
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-sm-10">
+        <div class="col-lg-6 col-sm-10 p-3">
+            {% include 'messages.html' %}
             <form method="POST">
                 <div class="form-group"></div>
                     {% csrf_token %}

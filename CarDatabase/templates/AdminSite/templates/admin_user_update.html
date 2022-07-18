@@ -4,8 +4,9 @@
 {% block content %}
 <main style="min-height: 100vh;">
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-sm-10">
-            <form class="form-group" method="POST" action="{% url '' %}">
+        <div class="col-lg-6 col-sm-10 p-3">
+            {% include 'messages.html' %}
+            <form class="form-group" method="POST" action="{% url 'admin-user-update' current_user.id %}">
                 {% csrf_token %}
                 <legend class="text-center">Update {{ current_user.username }}</legend>
                 <fieldset>
