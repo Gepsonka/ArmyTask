@@ -1,5 +1,6 @@
+from dataclasses import field
 from django import forms
-from .models import ManufacturerNamesModel
+from .models import ManufacturerNamesModel, CarTypesModel
 
     
 CHOICES = (
@@ -13,8 +14,15 @@ class CarAddFavouritesForm(forms.Form):
     color = forms.CharField(max_length=20)
     fuel = forms.ChoiceField(choices=CHOICES)
 
-class CarAddTypeForm(forms.Form):
-    car_type = forms.CharField(max_length=255)
+class CarAddTypeForm(forms.ModelForm):
+    manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
+    name = forms.CharField(max_length=255)
+
+    class Meta:
+        model = CarTypesModel
+        fields = ['manufacturer', 'name']
 
 class CarRequestManufacturerForm(forms.Form):
     manufacturer_name = forms.CharField(max_length=255)
+
+    

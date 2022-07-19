@@ -2,8 +2,17 @@
 
 
 {% block admin-content %}
-    <a class="btn btn-primary" href="{% url 'manufacturer-creation' %}">Accept all requests</a>
-    <a class="btn btn-danger" href="{% url 'manufacturer-creation' %}">Delete all requests</a>
+    <div class="d-flex justify-content-start">
+        <form class=" mb-2 me-2" action="{% url 'manufacturer-request-fulfill-all' %}" method="POST">
+            {% csrf_token %}
+            <input class="d-block btn btn-default btn-primary" type="submit" value="Accept all requests"/>
+        </form>
+        <form class="" action="{% url 'manufacturer-request-delete-all' %}" method="POST">
+            {% csrf_token %}
+            <input class="btn btn-default btn-danger" type="submit" value="Delete all requests"/>
+        </form>
+    </div>
+
     <table class="table">
         <thead>
             <tr>
@@ -16,13 +25,13 @@
         <tr class="table-primary">
             <td>{{ manufacturer_request.name }}</td>
             <td>
-                <form class="form-field" action="" method="POST">
+                <form class="form-field" action="{% url 'manufacturer-request-fulfill' manufacturer_request.pk %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-success" type="submit" value="Accept request"/>
+                    <input class="btn btn-default btn-primary" type="submit" value="Accept request"/>
                 </form>
             </td>
             <td>
-                <form class="form-field" action="" method="POST">
+                <form class="form-field" action="{% url 'manufacturer-request-delete' manufacturer_request.pk %}" method="POST">
                     {% csrf_token %}
                     <input class="btn btn-default btn-danger" type="submit" value="Delete request"/>
                 </form>

@@ -14,6 +14,7 @@
         {% csrf_token %}
         <div class="col-lg-3 col-sm-10 mb-2 p-0">
             <select name="manufacturer" class="form-select col-lg-2" aria-label="Car manufacturer">
+                <option value="none" selected disabled hidden>Select an Option</option>
                 {% for manufacturer in manufacturers %}
                 <option class="" value="{{ manufacturer.name }}">{{ manufacturer.name }}</option>
                 {% endfor %}
@@ -21,8 +22,8 @@
         </div>
         <input class="btn btn-outline-primary col-lg-1 col-sm-5 mx-lg-2" type="submit" value="Filter">
     </form>
-    <a class="btn btn-outline-primary mt-2" href="">Create new type</a>
-    <a class="btn btn-outline-warning mt-2" href="">Request new manufacturer</a>
+    <a class="btn btn-outline-primary mt-2" href="{% url 'car-create-new-type' %}">Create new type</a>
+    <a class="btn btn-outline-warning mt-2" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a>
     <table class="table mt-3">
         <thead>
             <tr>

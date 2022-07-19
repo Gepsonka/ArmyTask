@@ -14,7 +14,7 @@ class ManufacturerNamesModel(models.Model):
 class CarTypesModel(models.Model):
     '''Representing car models like X5, Swift, Yaris'''
     manufacturer = models.ForeignKey(ManufacturerNamesModel, on_delete=models.CASCADE)
-    name = models.CharField(unique=True, max_length=100)
+    name = models.CharField(unique=True, max_length=255)
 
     def __str__(self) -> str:
         return self.manufacturer.name + ' ' + self.name
@@ -31,7 +31,7 @@ class FavouriteCarsModel(models.Model):
         return f'{self.user.first_name} {self.user.last_name}\'s favourite: {self.car_type.__str__()}'
 
     class Meta:
-        unique_together = ('car_type', 'user')
+        unique_together = ('car_type', 'user', 'year')
 
 class CarPicturesModel(models.Model):
     user_favourite_car = models.ForeignKey(FavouriteCarsModel, on_delete=models.CASCADE)

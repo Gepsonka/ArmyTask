@@ -3,8 +3,10 @@ from .views import (
         users_page_view, user_delete_view, user_delete_all_view, user_delete_page_view,
         user_creation_view , user_unlock_page_view, user_unlock_view,
         user_unlock_all_view, make_admin_view, revoke_admin_view, user_update_page_view,
-        car_manufacturer_page_view, car_manufacturer_create_view, car_manufacturer_delete_view,
-        car_manufacturer_requests_page_view
+        admin_manufacturer_page_view, admin_manufacturer_create_view, admin_manufacturer_delete_view,
+        admin_manufacturer_requests_page_view, admin_manufacturer_request_delete_view,
+        admin_manufacturer_request_delete_all_view, admin_accept_new_manufacturer_request_view,
+        admin_accept_all_new_manufacturer_request_view
     )
 
 
@@ -28,9 +30,13 @@ urlpatterns = [
     # Admin right revoker
     path('revoke-admin/<int:id>/', revoke_admin_view, name='revoke-admin'),
     # Car database actions
-    path('manufacturers-list/', car_manufacturer_page_view, name='manufacturers-list'),
-    path('manufacturer-creation/', car_manufacturer_create_view, name='manufacturer-creation'),
-    path('manufacturer-deletion/<int:pk>/', car_manufacturer_delete_view, name='manufacturer-deletion'),
+    path('manufacturers-list/', admin_manufacturer_page_view, name='manufacturers-list'),
+    path('manufacturer-creation/', admin_manufacturer_create_view, name='manufacturer-creation'),
+    path('manufacturer-deletion/<int:pk>/', admin_manufacturer_delete_view, name='manufacturer-deletion'),
     # Manufacturer request actions
-    path('manufacturer-requests/', car_manufacturer_requests_page_view, name='manufacturer-requests'),
+    path('manufacturer-requests/', admin_manufacturer_requests_page_view, name='manufacturer-requests'),
+    path('manufacturer-request-delete/<int:pk>/', admin_manufacturer_request_delete_view, name='manufacturer-request-delete'),
+    path('manufacturer-request-delete-all/', admin_manufacturer_request_delete_all_view, name='manufacturer-request-delete-all'),
+    path('manufacturer-request-fulfill/<int:pk>/', admin_accept_new_manufacturer_request_view, name='manufacturer-request-fulfill'),
+    path('manufacturer-request-fulfill-all/', admin_accept_all_new_manufacturer_request_view, name='manufacturer-request-fulfill-all')
 ]

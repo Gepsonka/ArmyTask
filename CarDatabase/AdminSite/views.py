@@ -6,29 +6,11 @@ from CustomUser.models import CustomUser
 from django.contrib import messages
 from .forms import AdminUserForm, AdminUserUpdateForm, AdminManufacturerCreationForm
 from .models import CarNewManufacturerRequestsModel
+from CarData.models import ManufacturerNamesModel
 from CustomUser.decorators import admin_required
 from django.contrib.auth.decorators import login_required
 from CarData.models import ManufacturerNamesModel
 
-def username_is_exists(username):
-    if len(CustomUser.objects.filter(username=username)) == 1:
-        return True
-    return False
-
-def email_is_exists(email):
-    if len(CustomUser.objects.filter(email=email)) == 1:
-        return True
-    return False
-
-def manufacturer_is_exists(manufacturer_name):
-    if len(ManufacturerNamesModel.objects.filter(name=manufacturer_name)) == 1:
-        return True
-    return False
-
-def manufactuer_request_is_exists(manufacturer_name):
-    if len(CarNewManufacturerRequestsModel.objects.filter(name=manufacturer_name)) == 1:
-        return True
-    return False
 
 
 # Create your views here.
@@ -62,8 +44,7 @@ def user_creation_view(request):
                 messages.error(request, 'User with that username is already exists.')
                 return redirect('admin-user-creation')
 
-            if email_is_exists(form.cleaned_data.get('email')):
-                user_by_email = CustomUser.objects.get(email=form.cleaned_data.get('email'))
+            if CustomUser.objects.filter(email=form.cleaned_data.get('email')).exists():
                 messages.error(request, 'User with that email is already exists.')
                 return redirect('admin-user-creation')
                 
@@ -124,7 +105,7 @@ def user_update_page_view(request, id):
                 user_update.last_name = form.cleaned_data.get('last_name')
             
             if form.cleaned_data.get('email') != '' and user_update.email != form.cleaned_data.get('email'):
-                if email_is_exists(form.cleaned_data.get('email')):
+                if CustomUser.objects.filter(email=form.cleaned_data.get('email')).exists():
                     messages.error(request, 'Account with this email already exists!')
                     return redirect('admin-user-update', user_update.id)
                 else:
@@ -277,17 +258,17 @@ def revoke_admin_view(request, id):
 
 
 @admin_required('home')
-def car_manufacturer_page_view(request):
+def admin_manufacturer_page_view(request):
     manufacturers = ManufacturerNamesModel.objects.all()
     return render(request, 'AdminSite/templates/admin_car_manufacturers.html', {'manufacturers': manufacturers})
 
 @admin_required('home')
-def car_manufacturer_create_view(request):
+def admin_manufacturer_create_view(request):
     if request.method == 'POST':
         form  = AdminManufacturerCreationForm(request.POST)
 
         if form.is_valid():
-            if manufacturer_is_exists(form.cleaned_data.get('name')):
+            if ManufacturerNamesModel.objects.filter(name=form.cleaned_data.get('name')).exists():
                 messages.error(request, 'Manufacturer already exists!')
                 return redirect('manufacturer-creation')
 
@@ -305,10 +286,10 @@ def car_manufacturer_create_view(request):
     return render(request, 'AdminSite/templates/admin_car_manufacturer_creation.html', {'form':form})
 
 @admin_required('home')
-def car_manufacturer_delete_view(request, pk):
+def admin_manufacturer_delete_view(request, pk):
     '''Admins can delete manufacturers'''
     if request.method == 'POST':
-        if not manufacturer_is_exists(ManufacturerNamesModel.objects.filter(pk=pk).first().name):
+        if not ManufacturerNamesModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Manufacturer does not exists!')
             return redirect('manufacturers-list')
 
@@ -320,15 +301,72 @@ def car_manufacturer_delete_view(request, pk):
         return redirect('manufacturers-list')
 
 @admin_required('home')
-def car_manufacturer_requests_page_view(request):
+def admin_manufacturer_requests_page_view(request):
     manufacturer_requests = CarNewManufacturerRequestsModel.objects.all()
     return render(request, 'AdminSite/templates/admin_manufacturer_requests.html', {'manufacturer_requests':manufacturer_requests})
 
 
 @admin_required('home')
-def car_manufacturer_request_delete(request, pk):
+def admin_manufacturer_request_delete_view(request, pk):
     if request.method == 'POST':
-        if not manufactuer_request_is_exists(CarNewManufacturerRequestsModel.objects.filter(pk=pk).first().name):
+        if not CarNewManufacturerRequestsModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Could not delete manufacturer request because the request does not exists.')
-            return 
-        AdminManufacturerCreationForm.objects.filter(pk=pk).delete()
+            return redirect('manufacturer-requests')
+        
+        CarNewManufacturerRequestsModel.objects.filter(pk=pk).delete()
+
+        messages.success(request, 'Request was successfully deleted.')
+        return redirect('manufacturer-requests')
+
+
+@admin_required('home')
+def admin_manufacturer_request_delete_all_view(request):
+    if request.method == 'POST':
+        CarNewManufacturerRequestsModel.objects.all().delete()
+        messages.success(request, 'Requests were successfully deleted.')
+        return redirect('manufacturer-requests')
+
+@admin_required('home')
+def admin_accept_new_manufacturer_request_view(request, pk):
+    '''
+    Fulfilling one request of adding the requested manufacturer the to manufacturers model.
+    If the manufacturer was added previously, we delete the request and send a message.
+    '''
+    if request.method == 'POST':
+        if not CarNewManufacturerRequestsModel.objects.filter(pk=pk).exists():
+            messages.error(request, 'Could not fulfill new manufacturer request because the request does not exists.')
+            return redirect('manufacturer-requests')
+
+        manufacturer_request = CarNewManufacturerRequestsModel.objects.filter(pk=pk).first()
+
+        # If the manufacturer was added previously
+        if ManufacturerNamesModel.objects.filter(name=manufacturer_request.name).exists():
+            manufacturer_request.delete()
+            messages.warning(request, 'The manufacturer was already added so we deleted the request.')
+            return redirect('manufacturer-requests')
+
+        
+        ManufacturerNamesModel.objects.create(name=manufacturer_request.name).save()
+        messages.success(request, f'{manufacturer_request.name} was successfully added to manufacturers.')
+        # After fulfilling the request the request gets deleted
+        manufacturer_request.delete()
+
+        return redirect('manufacturer-requests')
+
+@admin_required('home')
+def admin_accept_all_new_manufacturer_request_view(request):
+    if request.method == 'POST':
+        manufacturer_requests = CarNewManufacturerRequestsModel.objects.all()
+
+        for req in manufacturer_requests:
+            if ManufacturerNamesModel.objects.filter(name=req.name).exists():
+                req.delete()
+                continue
+
+            ManufacturerNamesModel.objects.create(name=req.name).save()
+            # After fulfilling the request the request gets deleted
+            req.delete()
+        
+        messages.success(request, 'All requests are fulfilled.')
+        return redirect('manufacturer-requests')
+

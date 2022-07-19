@@ -1,10 +1,9 @@
 from sre_constants import SUCCESS
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from .forms import CarAddFavouritesForm, CarRequestManufacturerForm
+from .forms import CarAddFavouritesForm, CarRequestManufacturerForm, CarAddTypeForm
 from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
 from AdminSite.models import CarNewManufacturerRequestsModel
-from AdminSite.views import manufactuer_request_is_exists, manufacturer_is_exists
 from django.contrib import messages
 
 
@@ -16,6 +15,12 @@ def home_view(request):
 @login_required
 def car_base_view(request):
     if request.method == 'POST':
+        # If the user tries to filter to the default option in the dropdown
+        if not 'manufacturer' in dict(request.POST):
+            manufacturers = ManufacturerNamesModel.objects.all()
+            return render(request, 'CarData/templates/car_list_cars.html', {'filtered_car_types':[],
+                                                            'manufacturers': manufacturers})
+    
         filtered_car_types = CarTypesModel.objects.filter(
             manufacturer = ManufacturerNamesModel.objects.filter(name=request.POST['manufacturer']).first()
         )
@@ -24,7 +29,6 @@ def car_base_view(request):
         filtered_car_types = []
 
     manufacturers = ManufacturerNamesModel.objects.all()
-
     return render(request, 'CarData/templates/car_list_cars.html', {'filtered_car_types':filtered_car_types,
                                                             'manufacturers': manufacturers})  
 
@@ -40,16 +44,16 @@ def car_add_to_favourites_view(request, pk):
         form = CarAddFavouritesForm(request.POST)
 
         if form.is_valid():
-            if len(FavouriteCarsModel.objects.filter(car_type=car_type)) != 0:
+            if FavouriteCarsModel.objects.filter(car_type=car_type, year=form.cleaned_data.get('year')).exists():
                 messages.error(request, 'Car is already between your favourites')
                 return redirect('car-query')
 
             FavouriteCarsModel.objects.create(
                 car_type=car_type,
-                user = request.user,
-                year = form.cleaned_data.get('year'),
-                color = form.cleaned_data.get('color'),
-                fuel = form.cleaned_data.get('fuel')
+                user=request.user,
+                year=form.cleaned_data.get('year'),
+                color=form.cleaned_data.get('color'),
+                fuel=form.cleaned_data.get('fuel')
             ).save()
             
             messages.success(request, 'Car successfully added to favourites.')
@@ -65,9 +69,19 @@ def car_add_to_favourites_view(request, pk):
     return render(request, 'CarData/templates/car_add_favourite.html', {'form':form,'car_type':car_type})
 
 @login_required
-def create_car_type_view(request, manufacturer):
+def create_car_type_view(request):
     if request.method == 'POST':
-        pass
+        form = CarAddTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Car type successfully created.')
+            return redirect('car-query')
+
+    else:
+        form = CarAddTypeForm()
+
+    return render(request, 'CarData/templates/car_create_new_type.html', {'form': form})
 
 @login_required
 def create_manufacturer_request_view(request):
