@@ -7,14 +7,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from CustomUser.forms import UserRegisterForm
 from CustomUser.models import CustomUser
 from .froms import AccountRetrieveForm
+from CustomUser.decorators import not_logged_in_required
 
 # Create your views here.
 
 
+@not_logged_in_required('home')
 def registration_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -25,12 +24,9 @@ def registration_view(request):
         
     return render(request, 'Auth/templates/register.html', {'form': form})
 
-
+@not_logged_in_required('home')
 def login_view(request):
-    # if the user is already authenticated redirect to the home page
-    if request.user.is_authenticated:
-        return redirect('home')
-        
+    '''Login view for normal users'''
     # We only process data if the request method is POST
     # else we just render the page
     if request.method == 'POST':
@@ -43,7 +39,7 @@ def login_view(request):
         
         if user is not None:
             # admins cannot log in here
-            if user.is_superuser or user.is_staff:
+            if user.is_superuser:
                 messages.warning(request, f'Admins cannot log in here.')
                 return render(request, 'Auth/templates/login.html', {'form': form})
             
@@ -52,13 +48,13 @@ def login_view(request):
             # according to the check
             if not user.is_active:                
                 # If the user already sent a request we inform him/her about it
-                if not user.requested_unlock:
-                    messages.error(request, "Your account has been locked. Request to unlock.")
-                    return render(request, 'Auth/templates/login.html', {'form': form})
-                else:
+                if user.requested_unlock:
                     messages.error(request, "You have requested to unlock your account. Wait till the admins unlock it")
                     return render(request, 'Auth/templates/login.html', {'form': form})
-            
+                    
+                else:
+                    messages.error(request, "Your account has been locked. Request to unlock.")
+                    return render(request, 'Auth/templates/login.html', {'form': form})
             # Update unsuccessfull attempts to 0 after successful login
             user.unsuccessful_attempts = 0
             user.save()
@@ -100,7 +96,7 @@ def login_view(request):
                         user.is_active = False
                         user.save()
                     
-                    # If the user already sent a request we inform him/her about it
+                    # If the user already sent a request/did not send a request we inform him/her about it
                     if not user.requested_unlock:
                         messages.error(request, "Your account has been locked. Request to unlock.")
                         return render(request, 'Auth/templates/login.html', {'form': form})
@@ -118,16 +114,12 @@ def login_view(request):
     return render(request, 'Auth/templates/login.html', {'form': form})
 
 
-    
+@not_logged_in_required('home')
 def request_account_retrieve_view(request):
     '''
     Here the user can ask for account unlock after reaching the max amount of
     failed login attempts.
     '''
-
-    # if the user is already authenticated redirect to the home page
-    if request.user.is_authenticated:
-        return redirect('home')
     
     if request.method == 'POST':
         form = AccountRetrieveForm(request.POST)
@@ -140,6 +132,7 @@ def request_account_retrieve_view(request):
         
         
         if current_user is not None:
+            # Since admin's account cannot be locked, they cannot retrieve accounts
             if current_user.is_superuser or current_user.is_staff:
                 messages.warning(request, "Admins cannot retreive accounts.")
                 return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
@@ -149,7 +142,6 @@ def request_account_retrieve_view(request):
                 messages.info(request, "Account is active.")
                 return render(request, 'Auth/templates/request_acc_activation.html', {'form':form})
             else:
-                    
                 # If the current user does not have a request, create one
                 # else inform the user that there is already an activation process is ongoing.
                 if not current_user.requested_unlock:

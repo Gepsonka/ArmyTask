@@ -41,7 +41,7 @@ def not_admin_required(redirect_url_name, message='Admins cannot go there.'):
     return decorator
 
 
-def not_logged_in_required(redirect_url_name, message=''):
+def not_logged_in_required(redirect_url_name, message='Cannot access page as a logged in user.'):
     """
     Decorator for view. Checks if the user is authenticated, if not redirects the user
     to redirect_url_name url.

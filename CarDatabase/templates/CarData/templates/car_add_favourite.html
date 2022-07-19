@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block header %}
+<title>CarDatabase | New favourite car</title>
+{% endblock header %}
+
+
+{% block admin-content %}
+    <form class="form-field" action="{% url 'admin-user-delete-action' user.id %}" method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+    </form>
+    <a class="btn btn-primary" href="">Create new type</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Is admin?</th>
+                <th>Is staff?</th>
+                <th>Is active?</th>
+                <th>Delete Account</th>
+                <th>Admin</th>
+                <th>Update Account</th>
+            </tr>
+        </thead>
+        {% for user in all_users %}
+        <tr class="{% if user.is_superuser or user.is_staff %} table-primary {% endif %} {% if user.requested_delete %} table-danger {% elif user.requested_unlock %} table-warning {% endif %}">
+            <td>{{ user.username }}</td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.is_superuser %} Yes {% else %} No {% endif %}
+            </td>
+            <td>
+                {% if user.is_staff %} Yes {% else %} No {% endif %}
+            </td>
+            <td>
+                {% if user.is_active %} Yes {% else %} No {% endif %}
+            </td>
+            <td>
+                <form class="form-field" action="{% url 'admin-user-delete-action' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                </form>
+            </td>            
+            <td>
+                {% if not user.is_superuser %}
+                <form class="form-field" action="{% url 'make-admin' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-primary" type="submit" value="Add"/>
+                </form>
+                {% else %}
+                <form class="form-field" action="{% url 'revoke-admin' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="Revoke"/>
+                </form>
+                {% endif %}
+            </td>
+            <td>
+                <a class="btn btn-default btn-primary" href="{% url 'admin-user-update' user.id %}">Update account</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock admin-content %}
