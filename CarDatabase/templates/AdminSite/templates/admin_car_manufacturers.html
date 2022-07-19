@@ -1,0 +1,25 @@
+{% extends 'AdminSite/templates/admin_site_base.html' %}
+
+
+{% block admin-content %}
+    <a class="btn btn-success" href="{% url 'manufacturer-creation' %}">Add new manufacturer</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Manufacturer name</th>
+                <th>delete</th>
+            </tr>
+        </thead>
+        {% for manufacturer in manufacturers %}
+        <tr>
+            <td>{{ manufacturer.name }}</td>
+            <td>
+                <form class="form-field" action="{% url 'manufacturer-deletion' manufacturer.pk %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                </form>
+            </td>            
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock admin-content %}

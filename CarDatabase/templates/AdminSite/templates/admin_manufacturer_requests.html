@@ -1,0 +1,33 @@
+{% extends 'AdminSite/templates/admin_site_base.html' %}
+
+
+{% block admin-content %}
+    <a class="btn btn-primary" href="{% url 'manufacturer-creation' %}">Accept all requests</a>
+    <a class="btn btn-danger" href="{% url 'manufacturer-creation' %}">Delete all requests</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Requested manufacturer</th>
+                <th>accept</th>
+                <th>delete</th>
+            </tr>
+        </thead>
+        {% for manufacturer_request in manufacturer_requests %}
+        <tr class="table-primary">
+            <td>{{ manufacturer_request.name }}</td>
+            <td>
+                <form class="form-field" action="" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-success" type="submit" value="Accept request"/>
+                </form>
+            </td>
+            <td>
+                <form class="form-field" action="" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="Delete request"/>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock admin-content %}

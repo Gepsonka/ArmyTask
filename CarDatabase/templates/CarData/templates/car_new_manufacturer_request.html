@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block header %}
+<title>CarDatabase | Request new manufacturer</title>
+{% endblock header %}
+
+
+{% block content %}
+{% include 'messages.html' %}
+<main class="d-flex align-items-center" style="height:100vh"> 
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 mx-auto">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Request car manufacturer
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <fieldset class="form-group">
+                                {{ form|crispy }}
+                            </fieldset>
+                            <div class="form-group mt-3">
+                                <button class="btn btn-outline-info" type="submit">Send request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

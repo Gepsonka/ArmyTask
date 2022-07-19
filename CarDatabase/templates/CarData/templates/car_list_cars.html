@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block header %}
+<title>CarDatabase | New favourite car</title>
+{% endblock header %}
+
+
+{% block content %}
+<main class="container-fluid p-4" style="min-height: 100vh;">
+    {% include 'messages.html' %}
+    <form class="form-field row" action="{% url 'car-query' %}" method="POST">
+        {% csrf_token %}
+        <div class="col-lg-3 col-sm-10 mb-2 p-0">
+            <select name="manufacturer" class="form-select col-lg-2" aria-label="Car manufacturer">
+                {% for manufacturer in manufacturers %}
+                <option class="" value="{{ manufacturer.name }}">{{ manufacturer.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input class="btn btn-outline-primary col-lg-1 col-sm-5 mx-lg-2" type="submit" value="Filter">
+    </form>
+    <a class="btn btn-outline-primary mt-2" href="">Create new type</a>
+    <a class="btn btn-outline-warning mt-2" href="">Request new manufacturer</a>
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>Manufacturer name</th>
+                <th>Type</th>
+                <th>Make favourite</th>
+            </tr>
+        </thead>
+        {% for car in filtered_car_types %}
+        <tr>
+            <td>{{ car.manufacturer.name }}</td>
+            <td>{{ car.name }}</td>
+            <td>
+                <a class="btn btn-outlined-primary" href="{% url 'car-add-favourite' car.pk %}">Add to favourites</a>
+            </td>            
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+{% endblock content %}

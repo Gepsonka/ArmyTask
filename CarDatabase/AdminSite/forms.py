@@ -24,8 +24,5 @@ class AdminUserUpdateForm(forms.Form):
     is_superuser = forms.BooleanField(required=False, label='Is superuser?')
 
 
-# class AdminUserUpdateForm(forms.ModelForm):
-
-#     class Meta:
-#         model = CustomUser
-#         fields = ['username', 'first_name', 'last_name', 'email', 'password', 'is_active', 'is_superuser']
+class AdminManufacturerCreationForm(forms.Form):
+    name = forms.CharField(max_length=50, label='Manufacturer name')

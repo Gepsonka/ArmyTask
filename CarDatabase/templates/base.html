@@ -17,7 +17,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
-                    {% if user.is_superuser or user.is_staff %}
+                    {% if user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
@@ -27,9 +27,20 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
                             <li><a class="dropdown-item" href="{% url 'admin-users' %}">Users</a></li>
+                            <li><a class="dropdown-item" href="{% url 'manufacturers-list' %}">Car manufacturers</a></li>
+                            <li><a class="dropdown-item" href="{% url 'manufacturer-requests' %}">Car manufacturer requests</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-creation' %}">Create user</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-unlock' %}">Unlock requests</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-delete' %}">Delete requests</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a class="dropdown-item" href="#">Favourite cars</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -46,9 +57,9 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <li><a class="dropdown-item" href="#">Favourite cars</a></li>
-                            <li><a class="dropdown-item" href="#">Request new car</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
+                            <li><a class="dropdown-item" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a></li>
                             <li><a class="dropdown-item" href="{% url 'user-delete-request' %}">Request account delete</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
