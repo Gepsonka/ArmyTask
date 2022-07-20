@@ -13,6 +13,10 @@ def home_view(request):
 
 
 @login_required
+def car_favourites_view(requests):
+    pass
+
+@login_required
 def car_base_view(request):
     if request.method == 'POST':
         # If the user tries to filter to the default option in the dropdown

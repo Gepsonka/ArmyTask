@@ -105,7 +105,7 @@ def login_view(request):
                         return render(request, 'Auth/templates/login.html', {'form': form})
 
             else:
-                # If the user cannot be identified then just return a message
+                # If the user cannot be identified by usermame then just return a message
                 messages.error(request, f'Unsuccessful login')
         
     else:

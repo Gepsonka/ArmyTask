@@ -152,10 +152,15 @@ STATICFILES_DIRS = (
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
 AUTH_USER_MODEL = "CustomUser.CustomUser"
+
+# Base url to serve media files  
+MEDIA_URL = '/media/'  
+    
+# Path where media is stored  
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  

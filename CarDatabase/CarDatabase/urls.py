@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings  
 
 
 urlpatterns = [
@@ -25,3 +27,11 @@ urlpatterns = [
     path('admin-sites/', include('AdminSite.urls')),
     path('user/', include('CustomUser.urls')),
 ]
+
+
+# Because django is not a dedicated file serving service,
+# in production this does not work but in this case (DEBUG) we can use for serving files.
+# Because the lack of time I cannot set up a dedicated server (like ngix) which
+# could serve media files so now we are gonna serve these from a server url.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
