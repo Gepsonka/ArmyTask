@@ -10,7 +10,7 @@
 {% block content %}
 <main class="container-fluid p-4" style="min-height: 100vh;">
     {% include 'messages.html' %}
-    <form class="form-field row" action="{% url 'car-query' %}" method="POST">
+    <form class="form-field row" action="{% url 'car-favourite-cars-list' %}" method="POST">
         {% csrf_token %}
         <div class="col-lg-3 col-sm-10 mb-2 p-0">
             <select name="manufacturer" class="form-select col-lg-2" aria-label="Car manufacturer">
@@ -22,24 +22,31 @@
         </div>
         <input class="btn btn-outline-primary col-lg-1 col-sm-5 mx-lg-2" type="submit" value="Filter">
     </form>
-    <a class="btn btn-outline-primary mt-2" href="{% url 'car-create-new-type' %}">Create new type</a>
     <a class="btn btn-outline-primary mt-2" href="{% url 'car-add-favourites-separately' %}">Add favourite car</a>
-    <a class="btn btn-outline-warning mt-2" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a>
-    
+
     <table class="table mt-3">
         <thead>
             <tr>
                 <th>Manufacturer name</th>
                 <th>Type</th>
-                <th>Make favourite</th>
+                <th>Year</th>
+                <th>Color</th>
+                <th>Fuel type</th>
+                <th>Remove from favourites</th>
             </tr>
         </thead>
-        {% for car in filtered_car_types %}
+        {% for car in favourite_car_types %}
         <tr>
-            <td>{{ car.manufacturer.name }}</td>
-            <td>{{ car.name }}</td>
+            <td>{{ car.car_type.manufacturer.name }}</td>
+            <td>{{ car.car_type.name }}</td>
+            <td>{{ car.year }}</td>
+            <td>{{ car.color }}</td>
+            <td>{{ car.fuel }}</td>
             <td>
-                <a class="btn btn-outlined-primary" href="{% url 'car-add-favourite' car.pk %}">Add to favourites</a>
+                <form class="form-field" action="{% url 'car-delete-from-favourites' car.pk %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
+                </form>
             </td>            
         </tr>
         {% endfor %}

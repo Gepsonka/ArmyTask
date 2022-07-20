@@ -1,6 +1,8 @@
 from distutils.command.upload import upload
 from django.db import models
 from CustomUser.models import CustomUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from datetime import date
 
 # Create your models here.
 
@@ -18,12 +20,15 @@ class CarTypesModel(models.Model):
 
     def __str__(self) -> str:
         return self.manufacturer.name + ' ' + self.name
+    
+    class Meta:
+        unique_together = ('manufacturer', 'name')
 
 class FavouriteCarsModel(models.Model):
     '''User can select favourite cars from the available models'''
     car_type = models.ForeignKey(CarTypesModel, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(validators=[MinValueValidator(1880),MaxValueValidator(date.today().year)])
     color = models.CharField(max_length=50)
     fuel  = models.CharField(max_length=20)
 

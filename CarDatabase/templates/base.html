@@ -39,7 +39,7 @@
                             Actions
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="#">Favourite cars</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                             <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
                         </ul>
                     </li>
@@ -56,7 +56,7 @@
                             Actions
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="#">Favourite cars</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                             <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
                             <li><a class="dropdown-item" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a></li>
                             <li><a class="dropdown-item" href="{% url 'user-delete-request' %}">Request account delete</a></li>

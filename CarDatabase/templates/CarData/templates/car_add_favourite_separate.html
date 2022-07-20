@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<main style="min-height: 100vh;">
+    {% include 'messages.html' %}
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-sm-10 p-3">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group"></div>
+                    <legend class="text-center">Add to favourites</legend>
+                    <fieldset>
+                        {{ form | crispy}}
+                    </fieldset>
+                    <button class="btn btn-outline-info mr-2 my-2" type="submit">Add to favourites</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock content %}
