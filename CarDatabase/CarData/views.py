@@ -1,7 +1,9 @@
 from sre_constants import SUCCESS
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from .forms import CarAddFavouritesForm, CarRequestManufacturerForm, CarAddTypeForm, CarAddFavouritesSeparatelyForm
+from .forms import (CarAddFavouritesForm, CarRequestManufacturerForm, CarAddTypeForm,
+                     CarAddFavouritesSeparatelyForm, CarUpdateFavouriteCarForm,
+                      CarUploadCarImageForm)
 from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
 from AdminSite.models import CarNewManufacturerRequestsModel
 from django.contrib import messages
@@ -41,24 +43,62 @@ def car_favourite_car_list_view(request):
     manufacturers = ManufacturerNamesModel.objects.all()        
 
     if request.method == 'POST':
-        # If the user tries to filter to the default option in the dropdown
+        # If the user tries to filter to the default option in the dropdown return all
         if not 'manufacturer' in dict(request.POST):
-            return render(request, 'CarData/templates/car_favourite_cars_list.html', {'favourite_car_types':[],
+            favourite_car_types = FavouriteCarsModel.objects.filter(user=request.user)
+            return render(request, 'CarData/templates/car_favourite_cars_list.html', {'favourite_car_types':favourite_car_types,
                                                             'manufacturers': manufacturers})
-            
+        
+        # Does not work, I dunno why, oh that's why
         favourite_car_types = FavouriteCarsModel.objects.filter(
             user=request.user,
-            car_type=CarTypesModel.objects.filter(
-                name=ManufacturerNamesModel.objects.filter(name=request.POST['manufacturer']).first()
-            ).first()
-        )
-    
+            # Basically saying select those cars which car type's manufacturer's name is equal to request.POST['manufacturer']
+            car_type__manufacturer__name=request.POST['manufacturer']
+        )    
     else:
+        # If the page is being sent to the client side
         favourite_car_types = FavouriteCarsModel.objects.filter(user=request.user)
 
     return render(request, 'CarData/templates/car_favourite_cars_list.html', {'favourite_car_types':favourite_car_types,
                                                             'manufacturers': manufacturers})  
+
+@login_required
+def car_favourite_car_update_page_view(request, pk):
+    if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
+        messages.error(request, 'Car is not between your favourites.')
+        return redirect('car-update-favourite-car', pk)
+
+    if request.method == 'POST':
+        form = CarUpdateFavouriteCarForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Favourite car successfully updated')
+            return redirect('car-update-favourite-car', pk)
+
+    update_form = CarUpdateFavouriteCarForm()
+    upload_car_image_form = CarUploadCarImageForm()
+
+    return render(request=)
     
+
+@login_required
+def car_favourite_car_update_action_view(request, pk):
+    if request.method == 'POST':
+        if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
+            messages.error(request, 'Car is not between your favourites.')
+            return redirect('car-update-favourite-car', pk)
+
+        form = CarUpdateFavouriteCarForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Favourite car successfully updated')
+            return redirect('car-update-favourite-car', pk)
+
+
 @login_required
 def car_delete_car_from_favourites_view(request,pk):
     if request.method == 'POST':

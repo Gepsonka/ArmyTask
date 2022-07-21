@@ -1,6 +1,6 @@
-from dataclasses import field
+from dataclasses import field, fields
 from django import forms
-from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
+from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel, CarPicturesModel
 from django.utils.translation import gettext as _
 
     
@@ -8,7 +8,8 @@ CHOICES = (
     ('Gas', 'Gas'),
     ('Diesel', 'Diesel'),
     ('LPG gas', 'LPG gas'),
-    ('Electric', 'Electric')
+    ('Electric', 'Electric'),
+    ('Hybrid', 'Hybrid'),
 )
 
 class CarAddFavouritesForm(forms.Form):
@@ -16,6 +17,12 @@ class CarAddFavouritesForm(forms.Form):
     color = forms.CharField(max_length=50)
     fuel = forms.ChoiceField(choices=CHOICES)
     
+class CarUpdateFavouriteCarForm(forms.ModelForm):
+    fuel = forms.ChoiceField(choices=CHOICES)
+    class Meta:
+        model = FavouriteCarsModel
+        fields = ['year', 'color', 'fuel']
+
 class CarAddFavouritesSeparatelyForm(forms.ModelForm):
     manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
     car_type = forms.CharField(max_length=255)
@@ -74,8 +81,16 @@ class CarAddTypeForm(forms.ModelForm):
         model = CarTypesModel
         fields = ['manufacturer', 'name']
 
+class CarUploadCarImageForm(forms.ModelForm):
+    class Meta:
+        model = CarPicturesModel
+        fields = ['picture']
+
 class CarRequestManufacturerForm(forms.Form):
     manufacturer_name = forms.CharField(max_length=255)
+
+
+
     
     
 
