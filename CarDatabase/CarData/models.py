@@ -3,6 +3,7 @@ from django.db import models
 from CustomUser.models import CustomUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from datetime import date
+from PIL import Image
 
 # Create your models here.
 
@@ -41,3 +42,18 @@ class FavouriteCarsModel(models.Model):
 class CarPicturesModel(models.Model):
     user_favourite_car = models.ForeignKey(FavouriteCarsModel, on_delete=models.CASCADE)
     picture = models.ImageField(upload_to='cars')
+
+    def __str__(self) -> str:
+        return f'{self.user_favourite_car.user.first_name} {self.user_favourite_car.user.last_name}\'s picture of {self.user_favourite_car.car_type.__str__()}.'
+
+    def save(self):
+        super().save()  # saving image first
+
+        img = Image.open(self.picture.path) # Open image using self
+        basewidth = 300
+
+        if img.height > 300 or img.width > 300:
+            wpercent = (basewidth / float(img.size[0]))
+            hsize = int((float(img.size[1]) * float(wpercent)))
+            img = img.resize((basewidth, hsize), Image.ANTIALIAS)
+            img.save(self.picture.path)  # saving image at the same path

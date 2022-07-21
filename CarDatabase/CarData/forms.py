@@ -23,6 +23,8 @@ class CarUpdateFavouriteCarForm(forms.ModelForm):
         model = FavouriteCarsModel
         fields = ['year', 'color', 'fuel']
 
+    
+
 class CarAddFavouritesSeparatelyForm(forms.ModelForm):
     manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
     car_type = forms.CharField(max_length=255)

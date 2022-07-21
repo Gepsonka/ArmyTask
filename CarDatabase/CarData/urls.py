@@ -1,9 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import (home_view, car_base_view, car_add_to_favourites_view, create_manufacturer_request_view,
-                    create_car_type_view, car_add_to_favourites_separate_view, car_favourite_car_list_view,
-                    car_delete_car_from_favourites_view, car_favourite_car_update_action_view
-                    )
+from .views import *
 
 
 urlpatterns = [
@@ -15,5 +12,7 @@ urlpatterns = [
     path('car-add-favourites-separately/', car_add_to_favourites_separate_view, name='car-add-favourites-separately'),
     path('car-favourite-cars-list/', car_favourite_car_list_view, name='car-favourite-cars-list'),
     path('car-delete-from-favourites/<int:pk>/', car_delete_car_from_favourites_view, name='car-delete-from-favourites'),
-    path('car-update-favourite-car-action/<int:pk>/', car_favourite_car_update_action_view, name='car-update-favourite-car-action'),
+    path('car-favourite-car-update-page/<int:pk>/', car_favourite_car_update_page_view, name='car-favourite-car-update-page'),
+    path('car-upload-image/<int:pk>/', car_upload_image_view, name='car-upload-image'),
+    path('car-delete-image/<int:pk>/', car_image_delete_view, name='car-delete-image'),
 ]

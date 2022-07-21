@@ -5,35 +5,43 @@
 <main style="min-height: 100vh;">
     {% include 'messages.html' %}
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-sm-10 p-3">
+        <div class="col-lg-7 col-sm-10 p-3">
             <form method="POST">
                 {% csrf_token %}
                 <div class="form-group"></div>
-                    <legend class="text-center">Add to favourites</legend>
+                    <legend class="text-center">Update {{ favourite_car.car_type.manufacturer.name }} {{ favourite_car.car_type.name }}</legend>
                     <fieldset>
-                        {{ form | crispy}}
+                        {{ update_form | crispy}}
                     </fieldset>
-                    <button class="btn btn-outline-info mr-2 my-2" type="submit">Add to favourites</button>
+                    <button class="btn btn-outline-info mr-2 my-2" type="submit">Update</button>
                 </div>
             </form>
-        </div>
-        <div class="col-lg-6 col-sm-10 p-3">
-            <form method="POST">
+        
+        <div class="col-lg-7 col-sm-10 p-3">
+            <form method="POST" action="{% url 'car-upload-image' favourite_car.pk %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="form-group"></div>
+                <div class="form-group">
                     <legend class="text-center">Upload picture</legend>
                     <fieldset>
-                        {{ form | crispy}}
+                        {{ upload_car_image_form | crispy}}
                     </fieldset>
                     <button class="btn btn-outline-info mr-2 my-2" type="submit">Upload</button>
                 </div>
             </form>
         </div>
+        <h2 style="text-align: center;">Gallery</h2>
+        <div class="col-lg-7 col-sm-10 d-flex flex-wrap justify-content-center">
+            {% for image in car_images %}
+            <form class="d-flex flex-column me-2 my-2 p-2" method="POST" action="{% url 'car-delete-image' image.pk %}">
+                {% csrf_token %}
+                <img class="rounded mb-2" src="{{ image.picture.url }}" alt="Car image">
+                <input class="btn btn-default btn-danger mt-auto" type="submit" value="Delete picture"/>
+            </form>
+                
+            {% endfor %}
+        </div>
     </div>
-    <div class="d-flex justify-content-evenly ">
-        {% for image in car_images %}
-        <img class="rounded" src="{{ image.picture.url }}" alt="Car image">
-        {% endfor %}
-    </div>
+    
+    
 </main>
 {% endblock content %}

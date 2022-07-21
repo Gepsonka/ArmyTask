@@ -1,10 +1,11 @@
+from email import message
 from sre_constants import SUCCESS
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from .forms import (CarAddFavouritesForm, CarRequestManufacturerForm, CarAddTypeForm,
                      CarAddFavouritesSeparatelyForm, CarUpdateFavouriteCarForm,
                       CarUploadCarImageForm)
-from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
+from .models import CarPicturesModel, ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
 from AdminSite.models import CarNewManufacturerRequestsModel
 from django.contrib import messages
 
@@ -23,16 +24,16 @@ def car_base_view(request):
     if request.method == 'POST':
         # If the user tries to filter to the default option in the dropdown
         if not 'manufacturer' in dict(request.POST):
-            manufacturers = ManufacturerNamesModel.objects.all()
-            return render(request, 'CarData/templates/car_list_cars.html', {'filtered_car_types':[],
-                                                            'manufacturers': manufacturers})
-    
-        filtered_car_types = CarTypesModel.objects.filter(
-            manufacturer = ManufacturerNamesModel.objects.filter(name=request.POST['manufacturer']).first()
-        )
+            filtered_car_types = CarTypesModel.objects.all()
+            
+        else:
+            filtered_car_types = CarTypesModel.objects.filter(
+                manufacturer__name = request.POST['manufacturer']
+            )
 
     else:
-        filtered_car_types = []
+        filtered_car_types = filtered_car_types = CarTypesModel.objects.all()
+
 
     manufacturers = ManufacturerNamesModel.objects.all()
     return render(request, 'CarData/templates/car_list_cars.html', {'filtered_car_types':filtered_car_types,
@@ -66,38 +67,36 @@ def car_favourite_car_list_view(request):
 def car_favourite_car_update_page_view(request, pk):
     if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
         messages.error(request, 'Car is not between your favourites.')
-        return redirect('car-update-favourite-car', pk)
+        return redirect('car-favourite-car-update-page', pk)
+
+    favourite_car = FavouriteCarsModel.objects.filter(pk=pk, user=request.user).first()
+    car_images = CarPicturesModel.objects.filter(user_favourite_car = favourite_car)
 
     if request.method == 'POST':
-        form = CarUpdateFavouriteCarForm(request.POST)
+        form = CarUpdateFavouriteCarForm(request.POST, instance=favourite_car)
 
         if form.is_valid():
             form.save()
 
-            messages.success(request, 'Favourite car successfully updated')
-            return redirect('car-update-favourite-car', pk)
+            messages.success(request, 'Favourite car was successfully updated')
+            return redirect('car-favourite-car-update-page', pk)
+    else:
+        update_form = CarUpdateFavouriteCarForm(initial={
+            'year': favourite_car.year,
+            'color': favourite_car.color,
+            'fuel': favourite_car.fuel
+        })
+        upload_car_image_form = CarUploadCarImageForm()
 
-    update_form = CarUpdateFavouriteCarForm()
-    upload_car_image_form = CarUploadCarImageForm()
-
-    return render(request=)
+    return render(request, 'CarData/templates/car_modify_favourite_car.html', 
+            {
+                'favourite_car': favourite_car,
+                'update_form':update_form,
+                'upload_car_image_form': upload_car_image_form,
+                'car_images': car_images,
+            }
+        )
     
-
-@login_required
-def car_favourite_car_update_action_view(request, pk):
-    if request.method == 'POST':
-        if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
-            messages.error(request, 'Car is not between your favourites.')
-            return redirect('car-update-favourite-car', pk)
-
-        form = CarUpdateFavouriteCarForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-
-            messages.success(request, 'Favourite car successfully updated')
-            return redirect('car-update-favourite-car', pk)
-
 
 @login_required
 def car_delete_car_from_favourites_view(request,pk):
@@ -204,3 +203,48 @@ def create_manufacturer_request_view(request):
 
     return render(request, 'CarData/templates/car_new_manufacturer_request.html', {'form':form})
     
+@login_required
+def car_upload_image_view(request, pk):
+    '''
+    Favourite car image upload view.
+    Firt check if the facourite car is truly the user's,
+    then upoads.
+    '''
+    if request.method == 'POST':
+        # if the picture is not one of the user's favourite car's
+        if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
+            messages.error(request, 'Could not upload image to the car.')
+            return redirect('car-favourite-car-update-page', pk)
+
+        favourite_car = FavouriteCarsModel.objects.filter(pk=pk, user=request.user).first()
+        form = CarUploadCarImageForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.user_favourite_car = favourite_car
+            instance.save()
+
+            messages.success(request, 'Image was successfully uploaded!')
+    
+    return redirect('car-favourite-car-update-page', pk)
+            
+
+@login_required
+def car_image_delete_view(request, pk):
+    '''
+    User can delete picture from his/her favourite car.
+    '''
+    if request.method == 'POST':
+        # if the picture is not one of the user's favourite car's
+        if not CarPicturesModel.objects.filter(pk=pk, user_favourite_car__user=request.user).exists():
+            messages.error(request, 'Could not upload image to the car.')
+            return redirect('car-favourite-cars-list')
+            
+        picture = CarPicturesModel.objects.filter(pk=pk, user_favourite_car__user=request.user).first()
+        fav_car_pk = picture.user_favourite_car.pk
+        picture.delete()
+
+        messages.success(request, 'Picture was successfully deleted.')
+        return redirect('car-favourite-car-update-page', fav_car_pk)
+
+    return redirect('car-favourite-cars-list')

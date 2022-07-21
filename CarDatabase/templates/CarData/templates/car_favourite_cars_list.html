@@ -33,6 +33,7 @@
                 <th>Color</th>
                 <th>Fuel type</th>
                 <th>Remove from favourites</th>
+                <th>Update</th>
             </tr>
         </thead>
         {% for car in favourite_car_types %}
@@ -47,7 +48,8 @@
                     {% csrf_token %}
                     <input class="btn btn-default btn-danger" type="submit" value="&#10006;"/>
                 </form>
-            </td>            
+            </td>
+            <td><a class="btn btn-primary" href="{% url 'car-favourite-car-update-page' car.pk %}">Update</a></td>
         </tr>
         {% endfor %}
     </table>
