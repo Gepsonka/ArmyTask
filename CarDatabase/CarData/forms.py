@@ -1,6 +1,7 @@
 from dataclasses import field, fields
 from django import forms
-from .models import ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel, CarPicturesModel
+from .models import *
+from AdminSite.models import CarNewManufacturerRequestsModel, CarNewManufacturerRequestsDeleteModel
 from django.utils.translation import gettext as _
 
     
@@ -36,39 +37,43 @@ class CarAddFavouritesSeparatelyForm(forms.ModelForm):
         fields = ['manufacturer', 'year', 'color', 'fuel']
         
     def __init__(self, *args, **kwargs):
-       self.user = kwargs.pop('user', None) # using pop for security reasons
-       super().__init__(*args, **kwargs)
+        '''Had to override __init__ to add user attribute and to pass it from view'''
+        self.user = kwargs.pop('user', None) # using pop for security reasons
+        super().__init__(*args, **kwargs)
     
     def clean(self):
+        '''Basic validation of the form'''
         cleaned_data = super().clean()
         
         if not ManufacturerNamesModel.objects.filter(name=cleaned_data.get('manufacturer')).exists():
             raise forms.ValidationError({'manufacturer':['Manufacturer does not exists!',]})
         
+        # Do not forget that user, year and car_type are unique together!
         if (FavouriteCarsModel.objects.filter(
                 user=self.user,
                 year=cleaned_data.get('year'),
-                car_type=CarTypesModel.objects.filter(
-                            name=cleaned_data.get('car_type'),
-                            manufacturer = ManufacturerNamesModel.objects.filter(name=cleaned_data.get('manufacturer')).first()
-                        ).first(),
+                car_type__manufacturer__name=cleaned_data.get('manufacturer')
             ).exists()):
             raise forms.ValidationError(_('Car already between your favourites.'))
                 
     def save(self, commit=True):
+        '''
+        Override of the save() method in order to check if the type already exists,
+        if not create new one.
+        '''
         instance = super().save(commit=False)
         
-        # If the type does not exists create new one and set to the favourit car type
+        # If the type does not exists create new one and set to the favourite car type
         # else just set the type for the favourite car
         if not CarTypesModel.objects.filter(name=self.cleaned_data.get('car_type')).exists():
             new_type = CarTypesModel.objects.create(
-                    manufacturer=ManufacturerNamesModel.objects.filter(name=self.cleaned_data.get('manufacturer')).first(),
+                    manufacturer__name=self.cleaned_data.get('manufacturer'),
                     name=self.cleaned_data.get('car_type')
                 )
-            new_type.save()
             instance.car_type = new_type
-        else:
-            instance.car_type = CarTypesModel.objects.filter(name=self.cleaned_data.get('car_type')).first()
+            new_type.save()
+            
+        instance.car_type = CarTypesModel.objects.filter(name=self.cleaned_data.get('car_type')).first()
             
         if commit:
             instance.save()
@@ -88,12 +93,43 @@ class CarUploadCarImageForm(forms.ModelForm):
         model = CarPicturesModel
         fields = ['picture']
 
-class CarRequestManufacturerForm(forms.Form):
-    manufacturer_name = forms.CharField(max_length=255)
+class CarRequestManufacturerForm(forms.ModelForm):
+    class Meta:
+        model = CarNewManufacturerRequestsModel
+        fields = ['name']
 
+    def clean(self):
+        '''
+        Checking if the requested manufacturer is
+        already requested or already exists.
+        '''
+        cleaned_data = super().clean()
+        
+        if ManufacturerNamesModel.objects.filter(name=cleaned_data.get('name')).exists():
+            raise forms.ValidationError({'name':['Manufacturer already exists!',]})
+
+        if CarNewManufacturerRequestsModel.objects.filter(name=cleaned_data.get('name')).exists():
+            raise forms.ValidationError({'name':['Manufacturer is already requested!',]})
 
 
     
-    
+class CarRequestDeleteOfManufacturerForm(forms.ModelForm):
+    manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
+    class Meta:
+        model = CarNewManufacturerRequestsDeleteModel
+        fields = ['manufacturer']
+
+    def clean(self):
+        '''
+        Checking if the requested manufacturer is
+        already requested or already exists.
+        '''
+        cleaned_data = super().clean()
+
+        if CarNewManufacturerRequestsDeleteModel.objects.filter(manufacturer__name=cleaned_data.get('manufacturer')).exists():
+            raise forms.ValidationError({'manufacturer':['Delete is already requested!',]})
+
+        if not ManufacturerNamesModel.objects.filter(name=cleaned_data.get('manufacturer')).exists():
+            raise forms.ValidationError({'manufacturer':['Manufacturer does not exists!',]})
 
     

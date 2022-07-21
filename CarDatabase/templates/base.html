@@ -30,20 +30,20 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
                             <li><a class="dropdown-item" href="{% url 'admin-users' %}">Users</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin-user-creation' %}">Create user</a></li>
                             <li><a class="dropdown-item" href="{% url 'manufacturers-list' %}">Car manufacturers</a></li>
                             <li><a class="dropdown-item" href="{% url 'manufacturer-requests' %}">Car manufacturer requests</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admin-user-creation' %}">Create user</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-unlock' %}">Unlock requests</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin-user-delete' %}">Delete requests</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Actions
+                            Car
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                             <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -59,9 +59,10 @@
                             Actions
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                             <li><a class="dropdown-item" href="{% url 'car-query' %}">Car database</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-favourite-cars-list' %}">Favourite cars</a></li>
                             <li><a class="dropdown-item" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a></li>
+                            <li><a class="dropdown-item" href="{% url 'car-request-manufacturer-delete' %}">Request delete of manufacturer</a></li>
                             <li><a class="dropdown-item" href="{% url 'user-delete-request' %}">Request account delete</a></li>
                         </ul>
                     </li>
@@ -70,13 +71,13 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Register</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'admin-login' %}">Admin Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Register</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'retrieve-account' %}">Request unlock</a>

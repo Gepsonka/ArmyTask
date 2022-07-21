@@ -27,11 +27,19 @@ class CarTypesModel(models.Model):
 
 class FavouriteCarsModel(models.Model):
     '''User can select favourite cars from the available models'''
+    CHOICES = (
+        ('Gas', 'Gas'),
+        ('Diesel', 'Diesel'),
+        ('LPG gas', 'LPG gas'),
+        ('Electric', 'Electric'),
+        ('Hybrid', 'Hybrid'),
+    )
+
     car_type = models.ForeignKey(CarTypesModel, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     year = models.PositiveIntegerField(validators=[MinValueValidator(1880),MaxValueValidator(date.today().year)])
     color = models.CharField(max_length=50)
-    fuel  = models.CharField(max_length=20)
+    fuel  = models.CharField(max_length=20, choices=CHOICES)
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name}\'s favourite: {self.car_type.__str__()}'

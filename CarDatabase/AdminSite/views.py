@@ -4,7 +4,7 @@ from re import A
 from django.shortcuts import render, redirect
 from CustomUser.models import CustomUser
 from django.contrib import messages
-from .forms import AdminUserForm, AdminUserUpdateForm, AdminManufacturerCreationForm
+from .forms import AdminUserCreationForm, AdminUserUpdateForm, AdminManufacturerCreationForm
 from .models import CarNewManufacturerRequestsModel
 from CarData.models import ManufacturerNamesModel
 from CustomUser.decorators import admin_required
@@ -36,37 +36,16 @@ def user_creation_view(request):
     if there is not any create a new user with the given credentials, else send error message.
     '''    
     if request.method == 'POST':
-        form = AdminUserForm(request.POST)
+        form = AdminUserCreationForm(request.POST)
         
         if form.is_valid():
-            # Check if user with the same username or email exists
-            if CustomUser.objects.filter(username=form.cleaned_data.get('username')).exists():
-                messages.error(request, 'User with that username is already exists.')
-                return redirect('admin-user-creation')
-
-            if CustomUser.objects.filter(email=form.cleaned_data.get('email')).exists():
-                messages.error(request, 'User with that email is already exists.')
-                return redirect('admin-user-creation')
-                
-            CustomUser.objects.create_user(
-                username=form.cleaned_data.get('username'),
-                first_name=form.cleaned_data.get('first_name'),
-                last_name=form.cleaned_data.get('last_name'),
-                email=form.cleaned_data.get('email'),
-                password=form.cleaned_data.get('password'),
-                is_active=form.cleaned_data.get('is_active'),
-                is_superuser=form.cleaned_data.get('is_superuser')
-            )
+            form.save()
 
             messages.success(request, 'User created sucessfully.')
             return redirect('admin-users')
-        
-        else:
-            messages.error(request, 'Unknown error! Account could not be created.')
-            return redirect('admin-users')
 
     else:
-        form = AdminUserForm()
+        form = AdminUserCreationForm()
 
     return render(request, 'AdminSite/templates/admin_user_creation.html', {'form':form})
 
@@ -74,16 +53,22 @@ def user_creation_view(request):
 @admin_required('home')
 def user_update_page_view(request, id):
     '''
-    Account update view for the admins.    
+    Account update view for the admins.
+    Cannot employ here the usual form.save() method
+    since on the front-end giving password when updating user
+    is not necessary, and if I give those data to a form with
+    an empty password field it would set the password to nothing.
+    So I set, save and check everything manually.
     '''
-    try:
-        user_update = CustomUser.objects.get(id=id)
-    except:
+
+    if not CustomUser.objects.filter(id=id).exists():
         messages.error(request, 'Error! Could not update account because the account does not exist.')
         return redirect('admin-users')
 
+    user_update = CustomUser.objects.filter(id=id).first()
+
     if request.method == 'POST':
-        form = AdminUserUpdateForm(request.POST)
+        form = AdminUserUpdateForm(request.POST, user=user_update)
 
         if form.is_valid():
 
@@ -123,10 +108,6 @@ def user_update_page_view(request, id):
 
             messages.success(request, user_update.username + ' was successfully updated!')
             return redirect('admin-users')
-        
-        else:
-            messages.error(request, 'Unknown error! Account could not be updated.')
-            return redirect('admin-users')
     
     else:
         # If the page is requested we display the account's current credentials,
@@ -143,7 +124,6 @@ def user_update_page_view(request, id):
 
 
     return render(request, 'AdminSite/templates/admin_user_update.html', {'form':form, 'current_user':user_update})
-
 
 
 @admin_required('home')
@@ -167,8 +147,8 @@ def user_delete_view(request, id):
         try:
             CustomUser.objects.get(id=id).delete()
             messages.success(request, 'User was successfully deleted')
-
             return redirect('admin-users')
+
         except:
             messages.error(request, "Error! User does not exists!")
 
@@ -198,22 +178,23 @@ def user_unlock_page_view(request):
 def user_unlock_view(request, id):
     '''Unlocks account by id.'''
     if request.method=='POST':
-        try:
-            # Activating the user
-            user = CustomUser.objects.get(id=id)
-            # Checks if the account is actually locked
-            # If not do nothing and send back an error message
-            if user.unsuccessful_attempts < 5 and user.is_active:
-                messages.error(request, 'User is active. No need to unlock.')
-                return redirect('admin-user-unlock')
-            user.unsuccessful_attempts=0
-            user.is_active=True
-            user.requested_unlock=False
-            user.save()
-            messages.success(request, 'Account was successfully unlocked.')
-        except:
+        if not CustomUser.objects.filter(id=id).exists():
             messages.error(request, "Error! User does not exists!")
-    
+            return redirect('admin-user-unlock')
+
+        # Activating the user
+        user = CustomUser.objects.get(id=id)
+        # Checks if the account is actually locked
+        # If not do nothing and send back an error message
+        if user.unsuccessful_attempts < 5 and user.is_active:
+            messages.error(request, 'User is active. No need to unlock.')
+            return redirect('admin-user-unlock')
+        user.unsuccessful_attempts=0
+        user.is_active=True
+        user.requested_unlock=False
+        user.save()
+        messages.success(request, 'Account was successfully unlocked.')
+            
     return redirect('admin-user-unlock')
 
 @admin_required('home')
@@ -222,64 +203,66 @@ def user_unlock_all_view(request):
     if request.method=='POST':
         CustomUser.objects.filter(requested_unlock=True).update(unsuccessful_attempts=0, is_active=True, requested_unlock=False)
         messages.success(request, 'All account were successfully unlocked.')
+
     return redirect('admin-user-unlock')
 
 @admin_required('home')
 def make_admin_view(request, id):
-    '''Makes admin from an account.'''
+    '''Make admin from an account.'''
     if request.method=='POST':
-        try:
-            user = CustomUser.objects.get(id=id)
-            # Since admins cannot lock their accounts nor can
-            # request delete, we set the related values to default
-            user.is_superuser = True
-            user.unsuccessful_attempts = 0
-            user.requested_delete = False
-            user.requested_unlock = False
-            user.save()
-            username = user.username
-            messages.success(request, 'Successfully added admin privileges to ' + username)
-        except:
+        if not CustomUser.objects.filter(id=id):
             messages.error(request, "Error! User does not exists!")
+            return redirect('admin-users')
+
+        user = CustomUser.objects.filter(id=id).first()
+        user.is_superuser = True
+        # Since admins cannot lock their accounts nor can
+        # request delete, we set the related values to default
+        user.unsuccessful_attempts = 0
+        user.requested_delete = False
+        user.requested_unlock = False
+        messages.success(request, 'Successfully added admin privileges to ' + user.username)
+        user.save()
+
+    return redirect('admin-users')
+    
+    
 
 @admin_required('home')
 def revoke_admin_view(request, id):
     '''Revokes admin privileges from an account'''
     if request.method=='POST':
-        try:
-            user = CustomUser.objects.get(id=id)
-            user.is_superuser = False
-            user.save()
-            username = user.username
-            messages.success(request, 'Successfully revoked admin privileges from ' + username)
-        except:
+        if not CustomUser.objects.filter(id=id).exists():
             messages.error(request, "Error! User does not exists!")
+            return redirect('admin-users')
+
+        user = CustomUser.objects.get(id=id)
+        user.is_superuser = False
+        user.save()
+        username = user.username
+        messages.success(request, 'Successfully revoked admin privileges from ' + username)
+        
     return redirect('admin-users')
 
 
 @admin_required('home')
 def admin_manufacturer_page_view(request):
+    '''Displays list of manufacturers'''
     manufacturers = ManufacturerNamesModel.objects.all()
     return render(request, 'AdminSite/templates/admin_car_manufacturers.html', {'manufacturers': manufacturers})
 
 @admin_required('home')
 def admin_manufacturer_create_view(request):
+    '''By this view admins can add manufacturers'''
     if request.method == 'POST':
         form  = AdminManufacturerCreationForm(request.POST)
 
         if form.is_valid():
-            if ManufacturerNamesModel.objects.filter(name=form.cleaned_data.get('name')).exists():
-                messages.error(request, 'Manufacturer already exists!')
-                return redirect('manufacturer-creation')
+            form.save()
 
-            # Creating insntance and returning a message
-            ManufacturerNamesModel.objects.create(name=form.cleaned_data.get('name')).save()
             messages.success(request, 'Manufacturer successfully added')
             return redirect('manufacturers-list')
     
-        else:
-            messages.error(request, 'Unkown error occurred!')
-            return redirect('manufacturer-creation')
     else:
         form = AdminManufacturerCreationForm()
     
@@ -294,11 +277,9 @@ def admin_manufacturer_delete_view(request, pk):
             return redirect('manufacturers-list')
 
         ManufacturerNamesModel.objects.filter(pk=pk).delete()
-
         messages.success(request, 'Manufacturer successfully deleted with all relations.')
-        return redirect('manufacturers-list')
-    else:
-        return redirect('manufacturers-list')
+
+    return redirect('manufacturers-list')
 
 @admin_required('home')
 def admin_manufacturer_requests_page_view(request):
@@ -308,23 +289,26 @@ def admin_manufacturer_requests_page_view(request):
 
 @admin_required('home')
 def admin_manufacturer_request_delete_view(request, pk):
+    '''Make the admins be able to delete user\'s new manufacturer requests'''
     if request.method == 'POST':
         if not CarNewManufacturerRequestsModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Could not delete manufacturer request because the request does not exists.')
             return redirect('manufacturer-requests')
         
         CarNewManufacturerRequestsModel.objects.filter(pk=pk).delete()
-
         messages.success(request, 'Request was successfully deleted.')
-        return redirect('manufacturer-requests')
+    
+    return redirect('manufacturer-requests')
 
 
 @admin_required('home')
 def admin_manufacturer_request_delete_all_view(request):
+    '''Delete all manufacturer requests'''
     if request.method == 'POST':
         CarNewManufacturerRequestsModel.objects.all().delete()
         messages.success(request, 'Requests were successfully deleted.')
-        return redirect('manufacturer-requests')
+    
+    return redirect('manufacturer-requests')
 
 @admin_required('home')
 def admin_accept_new_manufacturer_request_view(request, pk):
@@ -339,7 +323,7 @@ def admin_accept_new_manufacturer_request_view(request, pk):
 
         manufacturer_request = CarNewManufacturerRequestsModel.objects.filter(pk=pk).first()
 
-        # If the manufacturer was added previously
+        # If the manufacturer was added previously just delete the rquest
         if ManufacturerNamesModel.objects.filter(name=manufacturer_request.name).exists():
             manufacturer_request.delete()
             messages.warning(request, 'The manufacturer was already added so we deleted the request.')
@@ -348,25 +332,30 @@ def admin_accept_new_manufacturer_request_view(request, pk):
         
         ManufacturerNamesModel.objects.create(name=manufacturer_request.name).save()
         messages.success(request, f'{manufacturer_request.name} was successfully added to manufacturers.')
-        # After fulfilling the request the request gets deleted
+        # After fulfilling the request delete the request
         manufacturer_request.delete()
 
-        return redirect('manufacturer-requests')
+    return redirect('manufacturer-requests')
 
 @admin_required('home')
 def admin_accept_all_new_manufacturer_request_view(request):
+    '''
+    Same as in the admin_accept_new_manufacturer_request_view view but iterate over all request.
+    '''
     if request.method == 'POST':
         manufacturer_requests = CarNewManufacturerRequestsModel.objects.all()
 
         for req in manufacturer_requests:
+            # If manufaturer already exists just delete the request
             if ManufacturerNamesModel.objects.filter(name=req.name).exists():
                 req.delete()
                 continue
-
+            # Else create the manufacturer
             ManufacturerNamesModel.objects.create(name=req.name).save()
             # After fulfilling the request the request gets deleted
             req.delete()
         
-        messages.success(request, 'All requests are fulfilled.')
-        return redirect('manufacturer-requests')
+        messages.success(request, 'All requests were fulfilled.')
+    
+    return redirect('manufacturer-requests')
 

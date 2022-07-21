@@ -1,13 +1,10 @@
-from email import message
-from sre_constants import SUCCESS
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from .forms import (CarAddFavouritesForm, CarRequestManufacturerForm, CarAddTypeForm,
-                     CarAddFavouritesSeparatelyForm, CarUpdateFavouriteCarForm,
-                      CarUploadCarImageForm)
+from .forms import *
 from .models import CarPicturesModel, ManufacturerNamesModel, CarTypesModel, FavouriteCarsModel
 from AdminSite.models import CarNewManufacturerRequestsModel
 from django.contrib import messages
+from CustomUser.decorators import not_admin_required
 
 
 # Create your views here.
@@ -164,6 +161,7 @@ def car_add_to_favourites_separate_view(request):
 
 @login_required
 def create_car_type_view(request):
+    '''Creating type which later can be added to favourites or '''
     if request.method == 'POST':
         form = CarAddTypeForm(request.POST)
         if form.is_valid():
@@ -178,37 +176,48 @@ def create_car_type_view(request):
     return render(request, 'CarData/templates/car_create_new_type.html', {'form': form})
 
 @login_required
+@not_admin_required('home', 'Admins cannot reach this page ( You have access to the db )')
 def create_manufacturer_request_view(request):
+    '''
+    Creating request for a manufacturer which later can be signed
+    by an admin, adding manufacturer to the database permanently (or delete the request).
+    '''
     if request.method == 'POST':
         form = CarRequestManufacturerForm(request.POST)
 
         if form.is_valid():
-            if (CarNewManufacturerRequestsModel.objects.filter(name=form.cleaned_data.get('manufacturer_name')).exists()
-                or ManufacturerNamesModel.objects.filter(name=form.cleaned_data.get('manufacturer_name')).exists()):
-                messages.error(request, 'Manufacturer or request already exists.')
-                return render(request, 'CarData/templates/car_new_manufacturer_request.html', {'form':form})
-
-
-            CarNewManufacturerRequestsModel.objects.create(name=form.cleaned_data.get('manufacturer_name')).save()
-
+            form.save()
             messages.success(request, 'Successfully created request!')
             return redirect('car-query')
-
-        else:
-            messages.error(request, 'Unknown error occurred')
-            
     
     else:
         form = CarRequestManufacturerForm()
 
     return render(request, 'CarData/templates/car_new_manufacturer_request.html', {'form':form})
+
+@login_required
+@not_admin_required('home', 'Admins cannot reach this page ( You have access to the db )')
+def car_create_manufacturer_delete_request_view(request):
+    if request.method == 'POST':
+        form = CarRequestDeleteOfManufacturerForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, 'Successfully created request!')
+
+    else:
+        form = CarRequestDeleteOfManufacturerForm()
+
+    return render(request, 'CarData/templates/car_manufacturer_request_for_delete.html', {'form':form})
     
 @login_required
 def car_upload_image_view(request, pk):
     '''
     Favourite car image upload view.
-    Firt check if the facourite car is truly the user's,
-    then upoads.
+    Firt check if the favourite car is truly the user's,
+    then upoad.
+    pk: FavouriteCarsModel's pk
     '''
     if request.method == 'POST':
         # if the picture is not one of the user's favourite car's
@@ -233,6 +242,7 @@ def car_upload_image_view(request, pk):
 def car_image_delete_view(request, pk):
     '''
     User can delete picture from his/her favourite car.
+    pk: CarPicturesModel's pk
     '''
     if request.method == 'POST':
         # if the picture is not one of the user's favourite car's
