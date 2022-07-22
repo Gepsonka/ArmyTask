@@ -129,3 +129,9 @@ dmypy.json
 .pyre/
 
 CarDatabase/media/cars/*
+CarDatabase/AdminAuth/migrations/*.py
+CarDatabase/AdminSite/migrations/*.py
+CarDatabase/Auth/migrations/*.py
+CarDatabase/CarData/migrations/*.py
+CarDatabase/CustomUser/migrations/*.py
+
