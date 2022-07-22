@@ -6,7 +6,7 @@
 {% endblock header %}
 
 {% block content %}
-<main class="container p-3">
+<main>
     {% if messages %}
     {% for message in messages %}
     {% if message.tags == "error" %}
@@ -20,6 +20,66 @@
     {% endif %}
     {% endfor %}
     {% endif %}
+    <section class="container-fluid my-2">
+        <div class="row justify-content-center">
+            <div class="col-lg-3 col-sm-10 mt-3">
+                <div class="card" style="height: 30rem;">
+                    <img class="card-img-top" src="https://www.carpixel.net/w/4ac5613396da3749c77999fd4ad8f1ea/suzuki-swift-sport-hybrid-wallpaper-hd-100922.jpg" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">Car database</h5>
+                        <article class="card-text mb-2">
+                            A place where you can keep track of your favourite car models, like the 1999 Honda Civic
+                            or Suzuki Swift. Explore the database with an easy to user UI, 
+                            add new car models and add cars to your favourites.
+                        </article>
+                    </div>
+                    <a href="{% url 'car-query' %}" class="btn btn-primary mt-auto mb-2 mx-2">Car database</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-10 mt-3">
+                <div class="card" style="height: 30rem;">
+                    <img class="card-img-top" src="https://wallpaperaccess.com/full/2688699.jpg" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">Extended admin functionalities</h5>
+                        <article class="card-text mb-2">
+                        Keep the control of your application in your hands.
+                        Manipulate data through an easy to use UI.
+                        </article>
+                    </div>
+                    <a href="{% url 'admin-users' %}" class="btn btn-primary mt-auto mb-2 mx-2 {% if not user.is_superuser %}disabled{% endif %}">Admin site</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-10 mt-3">
+                <div class="card" style="height: 30rem;">
+                    <img class="card-img-top" src="https://images.wallpapersden.com/image/download/programming-coding-language_bGhpbm6UmZqaraWkpJRmbmdlrWZlbWU.jpg" alt="Card image cap">
+                    <div class="card-body">
+                      <h5 class="card-title">Super secure</h5>
+                      <article class="card-text mb-2">
+                        Our secure application design and data policy prevents your data 
+                        to fall into unathorized hands.
+                      </article>
+                    </div>
+                    <a href="https://docs.djangoproject.com/en/4.0/" class="btn btn-primary mt-auto mb-2 mx-2">Framework documentation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="container-fluid bg-dark p-3" style="min-height: 100vh;">
+        <article class="row justify-content-center align-items-center  text-white fw-bold fs-1 my-auto" style="min-height: 100vh;">
+            <div class="col-12 text-center align-self-end">
+                Add cars to your favourites and upload images of them now.
+            </div>
+            <div class="col-12 justify-content-center text-center align-self-start">
+                {% if user.is_authenticated %}
+                <a href="{% url 'car-query' %}" class="btn btn-outline-light">Car databse</a>
+                <a href="{% url 'car-favourite-cars-list' %}" class="btn btn-outline-light">Favourite cars</a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-outline-light">Create account</a>
+                {% endif %}
+            </div>
+        </article>
+    </section>
 </main>
 
 {% endblock content %}

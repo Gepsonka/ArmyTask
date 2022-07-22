@@ -12,39 +12,29 @@
         <div class="row">
             <div class="col-sm-6 col-lg-4 mx-auto">
                 <div class="card">
-                    <div class="card-body">
-                        {% if messages %}
-                        {% for message in messages %}
-                        {% if message.tags == "error" %}
-                        <div class="alert alert-danger">
-                            {{message}}
-                        </div>
-                        {% else %}
-                        <div class="alert {% if message.tags %}alert-{{message.tags}}{% endif %} m-1">
-                            {{message}}
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-                        {% endif %}
-
+                    <div class="card-header text-center">
                         {% if not user.requested_delete %}
-                        <div class="card-title text-center bg-light">
-                            Are you sure want to request to delete your account?
-                        </div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                Account cannot be recovered after delete.
-                            </div>
-                            <form method="POST" action="{% url 'user-delete-request-action' %}">
-                                {% csrf_token %}
-                                <input class="btn btn-default btn-outline-danger" type="submit" value="Request account delete"/>
-                            </form>
-                        </div>
+                        Are you sure want to request to delete your account?
                         {% else %}
-                        <div class="card-title">
-                            Do you want to keep your account?
+                        Do you want to keep your account?
+                        {% endif %} 
+                    </div>
+                    <div class="card-body">
+                        {% include 'messages.html' %}
+                        {% if not user.requested_delete %}
+                        <div class="card-text mb-3">
+                            Account cannot be recovered after delete.
                         </div>
+                        <form method="POST" action="{% url 'user-delete-request-action' %}">
+                            {% csrf_token %}
+                            <input class="btn btn-default btn-outline-danger" type="submit" value="Request account delete"/>
+                        </form>
+                        {% else %}
+                        
                         <div class="card-body">
+                            <div class="card-text mb-3">
+                                Do you want to keep your account?
+                            </div>
                             <form method="POST" action="{% url 'user-delete-request-action' %}">
                                 {% csrf_token %}
                                 <input class="btn btn-default btn-outline-primary" type="submit" value="I am keeping my account."/>
