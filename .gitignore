@@ -137,3 +137,5 @@ CarDatabase/CustomUser/migrations/*.py
 
 CarDatabase/db.sqlite3
 
+CarDatabase/.env
+
