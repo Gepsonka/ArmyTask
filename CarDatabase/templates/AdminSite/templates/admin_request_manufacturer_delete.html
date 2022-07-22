@@ -1,0 +1,32 @@
+{% extends 'AdminSite/templates/admin_site_base.html' %}
+
+
+{% block admin-content %}
+    <a class="btn btn-success" href="{% url 'manufacturer-creation' %}">Fulfill all request</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Manufacturer name</th>
+                <th>Delete request</th>
+                <th>Fulfill request</th>
+            </tr>
+        </thead>
+        {% for request in manufacturer_delete_requests %}
+        <tr>
+            <td>{{ request.manufacturer.name }}</td>
+            <td>
+                <form class="form-field" action="{% url 'manufacturer-delete-delete-request' request.pk %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
+            <td>
+                <form class="form-field" action="{% url 'manufacturer-fulfill-delete-request' request.pk %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-success" type="submit" value="Fulfill"/>
+                </form>
+            </td>            
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock admin-content %}

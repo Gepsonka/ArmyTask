@@ -62,3 +62,9 @@ class AdminManufacturerCreationForm(forms.ModelForm):
     class Meta:
         model = ManufacturerNamesModel
         fields = ['name']
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        if ManufacturerNamesModel.objects.filter(name=cleaned_data.get('name')).exists():
+            raise forms.ValidationError({'name': ['Manufacturer already exists',]})

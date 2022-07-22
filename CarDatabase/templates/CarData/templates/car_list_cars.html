@@ -24,8 +24,9 @@
     </form>
     <a class="btn btn-outline-primary mt-2" href="{% url 'car-create-new-type' %}">Create new type</a>
     <a class="btn btn-outline-primary mt-2" href="{% url 'car-add-favourites-separately' %}">Add favourite car</a>
+    {% if not user.is_superuser %}
     <a class="btn btn-outline-warning mt-2" href="{% url 'request-new-manufacturer' %}">Request new manufacturer</a>
-    
+    {% endif %}
     <table class="table mt-3">
         <thead>
             <tr>

@@ -67,7 +67,7 @@ class CarAddFavouritesSeparatelyForm(forms.ModelForm):
         # else just set the type for the favourite car
         if not CarTypesModel.objects.filter(name=self.cleaned_data.get('car_type')).exists():
             new_type = CarTypesModel.objects.create(
-                    manufacturer__name=self.cleaned_data.get('manufacturer'),
+                    manufacturer=ManufacturerNamesModel.objects.filter(name=self.cleaned_data.get('manufacturer')).first(),
                     name=self.cleaned_data.get('car_type')
                 )
             instance.car_type = new_type

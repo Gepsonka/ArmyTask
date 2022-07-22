@@ -5,3 +5,4 @@ from CustomUser.models import CustomUser
 
 class AccountRetrieveForm(forms.Form):
     username = forms.CharField(label="Username", max_length=255)
+    

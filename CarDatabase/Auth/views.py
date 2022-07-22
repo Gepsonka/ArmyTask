@@ -74,18 +74,13 @@ def login_view(request):
             
             
             if user is not None:
-                # Admins cannot use this page to log in
-                if user.is_superuser or user.is_staff:
-                    messages.warning(request, f'Admins cannot log in here.')
-                    return render(request, 'Auth/templates/login.html', {'form': form})
-                
                 # If the user can be identified by username after an unsuccessful login
                 # increase the number of unsuccessful logins of the user and send a message
                 user.unsuccessful_attempts += 1
                 user.save()
                 
                 # If the user failed to log in more than
-                # 5 times we do no display the remaining attempts.
+                # 5 times we do not display the remaining attempts.
                 if 5 - user.unsuccessful_attempts > 0:
                     messages.warning(request, f'You have {5 - user.unsuccessful_attempts} attempts remaining')
                 

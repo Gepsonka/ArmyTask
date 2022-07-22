@@ -1,11 +1,8 @@
-from email.errors import MessageError
-from email.utils import parseaddr
-from re import A
 from django.shortcuts import render, redirect
 from CustomUser.models import CustomUser
 from django.contrib import messages
 from .forms import AdminUserCreationForm, AdminUserUpdateForm, AdminManufacturerCreationForm
-from .models import CarNewManufacturerRequestsModel
+from .models import CarNewManufacturerRequestsModel, CarNewManufacturerRequestsDeleteModel
 from CarData.models import ManufacturerNamesModel
 from CustomUser.decorators import admin_required
 from django.contrib.auth.decorators import login_required
@@ -270,7 +267,10 @@ def admin_manufacturer_create_view(request):
 
 @admin_required('home')
 def admin_manufacturer_delete_view(request, pk):
-    '''Admins can delete manufacturers'''
+    '''
+    Delete manufacturer.
+    pk: ManufacturerNamesModel's pk
+    '''
     if request.method == 'POST':
         if not ManufacturerNamesModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Manufacturer does not exists!')
@@ -289,7 +289,10 @@ def admin_manufacturer_requests_page_view(request):
 
 @admin_required('home')
 def admin_manufacturer_request_delete_view(request, pk):
-    '''Make the admins be able to delete user\'s new manufacturer requests'''
+    '''
+    Make the admins be able to delete user\'s new manufacturer requests
+    pk: CarNewManufacturerRequestsModel's pk
+    '''
     if request.method == 'POST':
         if not CarNewManufacturerRequestsModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Could not delete manufacturer request because the request does not exists.')
@@ -303,7 +306,7 @@ def admin_manufacturer_request_delete_view(request, pk):
 
 @admin_required('home')
 def admin_manufacturer_request_delete_all_view(request):
-    '''Delete all manufacturer requests'''
+    '''Delete all new manufacturer requests'''
     if request.method == 'POST':
         CarNewManufacturerRequestsModel.objects.all().delete()
         messages.success(request, 'Requests were successfully deleted.')
@@ -315,6 +318,7 @@ def admin_accept_new_manufacturer_request_view(request, pk):
     '''
     Fulfilling one request of adding the requested manufacturer the to manufacturers model.
     If the manufacturer was added previously, we delete the request and send a message.
+    pk: CarNewManufacturerRequestsModel's pk
     '''
     if request.method == 'POST':
         if not CarNewManufacturerRequestsModel.objects.filter(pk=pk).exists():
@@ -340,7 +344,8 @@ def admin_accept_new_manufacturer_request_view(request, pk):
 @admin_required('home')
 def admin_accept_all_new_manufacturer_request_view(request):
     '''
-    Same as in the admin_accept_new_manufacturer_request_view view but iterate over all request.
+    Same as in the admin_accept_new_manufacturer_request_view view 
+    but iterate over all request and accept all.
     '''
     if request.method == 'POST':
         manufacturer_requests = CarNewManufacturerRequestsModel.objects.all()
@@ -358,4 +363,47 @@ def admin_accept_all_new_manufacturer_request_view(request):
         messages.success(request, 'All requests were fulfilled.')
     
     return redirect('manufacturer-requests')
+
+@admin_required('home')
+def admin_manufacturer_delete_request_page_view(request):
+    manufacturer_delete_requests = CarNewManufacturerRequestsDeleteModel.objects.all()
+    return render(request, 'AdminSite/templates/admin_request_manufacturer_delete.html', 
+            {
+                'manufacturer_delete_requests':manufacturer_delete_requests
+            })
+
+
+@admin_required('home')
+def admin_manufacturer_delete_request_fulfill_view(request,pk):
+    '''
+    Fulfill a manufacturer delete request.
+    pk: CarNewManufacturerRequestsDeleteModel's pk
+    '''
+    if request.method == 'POST':
+        if not CarNewManufacturerRequestsDeleteModel.objects.filter(pk=pk).exists():
+            messages.error(request, "Delete request does not exists.")
+            return redirect('manufacturer-delete-requests')
+        # Don't have to delete the CarNewManufacturerRequestsDeleteModel separately because
+        # of the on_delete=models.CASCADE which makes the object deleted if its corresponding
+        # foreign key gets deleted
+        CarNewManufacturerRequestsDeleteModel.objects.filter(pk=pk).first().manufacturer.delete()
+        messages.success(request, "Delete request was successfully fulfilled.")
+        
+    return redirect('manufacturer-delete-requests')
+
+@admin_required('home')
+def admin_manufacturer_delete_request_delete_view(request, pk):
+    '''
+    Delete a manufacturer delete request.
+    pk: CarNewManufacturerRequestsDeleteModel's pk
+    '''
+    if request.method == 'POST':
+        if not CarNewManufacturerRequestsDeleteModel.objects.filter(pk=pk).exists():
+            messages.error(request, "Delete request does not exists.")
+            return redirect('manufacturer-delete-requests')
+        
+        CarNewManufacturerRequestsDeleteModel.objects.filter(pk=pk).delete()
+        messages.success(request, "Delete request was successfully deleted.")
+    
+    return redirect('manufacturer-delete-requests')
 
