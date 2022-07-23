@@ -1,7 +1,7 @@
 {% extends 'AdminSite/templates/admin_site_base.html' %}
 
 {% block admin-content %}
-<main style="min-height: 100vh;">
+    <h2 style="text-align: center;">Account delete requests</h2>
     <form class="form-field" action="{% url 'admin-user-delete-all-action' %}" method="POST">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete all requested"/>
@@ -31,5 +31,4 @@
         </tr>
         {% endfor %}
     </table>
-</main>
 {% endblock admin-content %}

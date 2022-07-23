@@ -2,7 +2,7 @@
 
 
 {% block admin-content %}
-    <a class="btn btn-success" href="{% url 'manufacturer-creation' %}">Fulfill all request</a>
+    <h2 style="text-align: center;">Manufacturer delete requests</h2>
     <table class="table">
         <thead>
             <tr>
@@ -17,13 +17,13 @@
             <td>
                 <form class="form-field" action="{% url 'manufacturer-delete-delete-request' request.pk %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+                    <input class="btn btn-default btn-danger" type="submit" value="Delete request"/>
                 </form>
             </td>
             <td>
                 <form class="form-field" action="{% url 'manufacturer-fulfill-delete-request' request.pk %}" method="POST">
                     {% csrf_token %}
-                    <input class="btn btn-default btn-success" type="submit" value="Fulfill"/>
+                    <input class="btn btn-default btn-success" type="submit" value="Fulfill request"/>
                 </form>
             </td>            
         </tr>

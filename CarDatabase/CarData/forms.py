@@ -14,19 +14,25 @@ CHOICES = (
 )
 
 class CarAddFavouritesForm(forms.Form):
+    '''
+    This form is used when the user adds an already existing
+    car. This way the manufacturer and the model is known
+    the user only need to specify the color, year and fuel type
+    '''
+
     year = forms.IntegerField(min_value=1880)
     color = forms.CharField(max_length=50)
     fuel = forms.ChoiceField(choices=CHOICES)
     
-class CarUpdateFavouriteCarForm(forms.ModelForm):
-    fuel = forms.ChoiceField(choices=CHOICES)
-    class Meta:
-        model = FavouriteCarsModel
-        fields = ['year', 'color', 'fuel']
 
-    
 
 class CarAddFavouritesSeparatelyForm(forms.ModelForm):
+    '''
+    Using this the user has to specify not only the year,color and fuel type
+    but the manufacturer and the model too.
+    If a model is exists, just add to favourites, else create new
+    model with the selected manufacturer and make that favourite.
+    '''
     manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
     car_type = forms.CharField(max_length=255)
     year = forms.IntegerField(min_value=1880)
@@ -38,6 +44,7 @@ class CarAddFavouritesSeparatelyForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         '''Had to override __init__ to add user attribute and to pass it from view'''
+
         self.user = kwargs.pop('user', None) # using pop for security reasons
         super().__init__(*args, **kwargs)
     
@@ -80,7 +87,23 @@ class CarAddFavouritesSeparatelyForm(forms.ModelForm):
         
         return instance
 
+class CarUpdateFavouriteCarForm(forms.ModelForm):
+    '''
+    Used for updating favourite cars.
+    The user can only update the year, color and fuel type.
+    If the user wants to update the manufacturer/model it is easier
+    to delete the current car from favourites and create a new favourite car
+    '''
+
+    fuel = forms.ChoiceField(choices=CHOICES)
+    class Meta:
+        model = FavouriteCarsModel
+        fields = ['year', 'color', 'fuel']
+
+
 class CarAddTypeForm(forms.ModelForm):
+    '''User can add car model with this form.'''
+
     manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
     name = forms.CharField(max_length=255)
 
@@ -89,11 +112,16 @@ class CarAddTypeForm(forms.ModelForm):
         fields = ['manufacturer', 'name']
 
 class CarUploadCarImageForm(forms.ModelForm):
+    '''
+    User can upload image to his/her favourite car with this form.
+    '''
     class Meta:
         model = CarPicturesModel
         fields = ['picture']
 
 class CarRequestManufacturerForm(forms.ModelForm):
+    '''Users can request yet non existent manufacturers to be added.'''
+
     class Meta:
         model = CarNewManufacturerRequestsModel
         fields = ['name']
@@ -114,6 +142,11 @@ class CarRequestManufacturerForm(forms.ModelForm):
 
     
 class CarRequestDeleteOfManufacturerForm(forms.ModelForm):
+    '''
+    Users can request manufacturer delete manufacturers
+    for i.e. when a manufacturer is duplicated or if someone accidetally
+    added non existent manufacturer.
+    '''
     manufacturer = forms.ModelChoiceField(queryset=ManufacturerNamesModel.objects.all())
     class Meta:
         model = CarNewManufacturerRequestsDeleteModel

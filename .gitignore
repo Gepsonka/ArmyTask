@@ -128,12 +128,15 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Exclude media files
 CarDatabase/media/cars/*
-CarDatabase/AdminAuth/migrations/*.py
-CarDatabase/AdminSite/migrations/*.py
-CarDatabase/Auth/migrations/*.py
-CarDatabase/CarData/migrations/*.py
-CarDatabase/CustomUser/migrations/*.py
+
+# Exclude migration files
+CarDatabase/AdminAuth/migrations/*initial.py
+CarDatabase/AdminSite/migrations/*initial.py
+CarDatabase/Auth/migrations/*initial.py
+CarDatabase/CarData/migrations/*initial.py
+CarDatabase/CustomUser/migrations/*initial.py
 
 CarDatabase/db.sqlite3
 

@@ -26,7 +26,7 @@ def admin_login_view(request):
                 return render(request, 'AdminAuth/templates/admin_login.html', {'form': form})
 
             login(request, user)
-            return redirect('home') # Later change the redirect to the admin site
+            return redirect('admin-users')
 
         else:
             form = AuthenticationForm()

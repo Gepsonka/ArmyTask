@@ -11,7 +11,7 @@
                 <div class="form-group"></div>
                     {% csrf_token %}
                     <legend class="text-center">Add to favourites</legend>
-                    <span>manufacturer: {{ car_type.manufacturer.name }}, model: {{ car_type.name }}</span>
+                    <span style="display:block; text-align: center;">manufacturer: {{ car_type.manufacturer.name }}, model: {{ car_type.name }}</span>
                     <fieldset>
                         {{ form | crispy}}
                     </fieldset>

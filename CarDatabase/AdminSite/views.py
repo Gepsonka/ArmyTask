@@ -228,6 +228,7 @@ def make_admin_view(request, id):
 @admin_required('home')
 def revoke_admin_view(request, id):
     '''Revokes admin privileges from an account'''
+
     if request.method=='POST':
         if not CustomUser.objects.filter(id=id).exists():
             messages.error(request, "Error! User does not exists!")
@@ -245,12 +246,14 @@ def revoke_admin_view(request, id):
 @admin_required('home')
 def admin_manufacturer_page_view(request):
     '''Displays list of manufacturers'''
+
     manufacturers = ManufacturerNamesModel.objects.all()
     return render(request, 'AdminSite/templates/admin_car_manufacturers.html', {'manufacturers': manufacturers})
 
 @admin_required('home')
 def admin_manufacturer_create_view(request):
-    '''By this view admins can add manufacturers'''
+    '''Admins can create manufacturers'''
+
     if request.method == 'POST':
         form  = AdminManufacturerCreationForm(request.POST)
 
@@ -271,6 +274,7 @@ def admin_manufacturer_delete_view(request, pk):
     Delete manufacturer.
     pk: ManufacturerNamesModel's pk
     '''
+    
     if request.method == 'POST':
         if not ManufacturerNamesModel.objects.filter(pk=pk).exists():
             messages.error(request, 'Manufacturer does not exists!')

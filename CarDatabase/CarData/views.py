@@ -11,13 +11,12 @@ from CustomUser.decorators import not_admin_required
 def home_view(request):
     return render(request, "CarData/templates/home.html")
 
-
-@login_required
-def car_favourites_view(requests):
-    pass
-
 @login_required
 def car_base_view(request):
+    '''
+    View to see the available manufacturers with their models
+    User can filter with the dropdown.
+    '''
     if request.method == 'POST':
         # If the user tries to filter to the default option in the dropdown
         if not 'manufacturer' in dict(request.POST):
@@ -38,6 +37,11 @@ def car_base_view(request):
 
 @login_required
 def car_favourite_car_list_view(request):
+    '''
+    Listing user's favourite cars
+    User can filter with the dropdown.
+    '''
+
     manufacturers = ManufacturerNamesModel.objects.all()        
 
     if request.method == 'POST':
@@ -62,9 +66,14 @@ def car_favourite_car_list_view(request):
 
 @login_required
 def car_favourite_car_update_page_view(request, pk):
+    '''
+    User can update his/her favourite car here and upload images.
+    pk: FavouriteCarsModel's
+    '''
+
     if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
         messages.error(request, 'Car is not between your favourites.')
-        return redirect('car-favourite-car-update-page', pk)
+        return redirect('car-favourite-cars-list')
 
     favourite_car = FavouriteCarsModel.objects.filter(pk=pk, user=request.user).first()
     car_images = CarPicturesModel.objects.filter(user_favourite_car = favourite_car)
@@ -97,6 +106,11 @@ def car_favourite_car_update_page_view(request, pk):
 
 @login_required
 def car_delete_car_from_favourites_view(request,pk):
+    '''
+    User can delete car from his favourites.
+    pk: FavouriteCarsModel's
+    '''
+
     if request.method == 'POST':
         if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():
             messages.error(request, 'Car between your favourites could not found.')
@@ -108,6 +122,11 @@ def car_delete_car_from_favourites_view(request,pk):
 
 @login_required
 def car_add_to_favourites_view(request, pk):
+    '''
+    User can add car to his/her favourites
+    pk: CarTypesModel's
+    '''
+
     if not CarTypesModel.objects.filter(pk=pk).exists():
         messages.error(request, 'Car type not found')
         return redirect('car-query')
@@ -144,6 +163,11 @@ def car_add_to_favourites_view(request, pk):
 
 @login_required
 def car_add_to_favourites_separate_view(request):
+    '''
+    User can specify the manufacturer and the model of the car
+    and add to his/her favourites.
+    '''
+
     if request.method == 'POST':
         form = CarAddFavouritesSeparatelyForm(request.POST, user=request.user)
         
@@ -161,7 +185,10 @@ def car_add_to_favourites_separate_view(request):
 
 @login_required
 def create_car_type_view(request):
-    '''Creating type which later can be added to favourites or '''
+    '''
+    Creating type which later can be added to favourites
+    and will be displayed in the car-query url
+    '''
     if request.method == 'POST':
         form = CarAddTypeForm(request.POST)
         if form.is_valid():
@@ -198,6 +225,8 @@ def create_manufacturer_request_view(request):
 @login_required
 @not_admin_required('home', 'Admins cannot reach this page ( You have access to the db )')
 def car_create_manufacturer_delete_request_view(request):
+    '''Request to delete a manufacturer, admin can fulfill it.'''
+    
     if request.method == 'POST':
         form = CarRequestDeleteOfManufacturerForm(request.POST)
 
@@ -219,6 +248,7 @@ def car_upload_image_view(request, pk):
     then upoad.
     pk: FavouriteCarsModel's pk
     '''
+
     if request.method == 'POST':
         # if the picture is not one of the user's favourite car's
         if not FavouriteCarsModel.objects.filter(pk=pk, user=request.user).exists():

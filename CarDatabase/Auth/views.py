@@ -14,6 +14,8 @@ from CustomUser.decorators import not_logged_in_required
 
 @not_logged_in_required('home')
 def registration_view(request):
+    '''User registration is processed here'''
+
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -112,7 +114,7 @@ def login_view(request):
 @not_logged_in_required('home')
 def request_account_retrieve_view(request):
     '''
-    Here the user can ask for account unlock after reaching the max amount of
+    The user can ask for account unlock after reaching the max amount of
     failed login attempts.
     '''
     

@@ -16,6 +16,7 @@ from django.utils.translation import gettext as _
 #     is_superuser = forms.BooleanField(required=False, label='Is superuser?')
 
 class AdminUserCreationForm(forms.ModelForm):
+    '''Form to create user from the admin site'''
     password = forms.CharField(widget=forms.PasswordInput())
     class Meta:
         model = CustomUser
@@ -25,7 +26,7 @@ class AdminUserCreationForm(forms.ModelForm):
         '''Has to be rewritten otherwise it would not hash the password'''
         instance = super().save(commit)
 
-        # It does the passwd hashing
+        # Do the passwd hashing
         instance.set_password(self.cleaned_data.get('password'))
 
         if commit:
