@@ -135,3 +135,4 @@ CarDatabase/Auth/migrations/*.py
 CarDatabase/CarData/migrations/*.py
 CarDatabase/CustomUser/migrations/*.py
 
+CarDatabase/db.sqlite3

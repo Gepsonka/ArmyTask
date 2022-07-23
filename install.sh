@@ -58,8 +58,20 @@ echo "====================="
 echo "Migrating database..."
 echo "====================="
 
-python3 $current_dir/CarDatabase/manage.py makemigrations
-python3 $current_dir/CarDatabase/manage.py migrate
+if python3 $current_dir/CarDatabase/manage.py makemigrations; then
+    echo "Migration files created successfully!"
+else 
+    echo "Could not create migration files"
+    exit 0
+fi
+
+
+if python3 $current_dir/CarDatabase/manage.py migrate; then
+    echo "Successfully migrated database!"
+else 
+    echo "Could not migrate databse :("
+    exit 0
+fi
 
 echo "====================="
 echo "Creating superuser..."
