@@ -9,7 +9,7 @@ from PIL import Image
 
 class ManufacturerNamesModel(models.Model):
     '''Representing manufacturer names like BMW, Suzuki, Toyota'''
-    name = models.CharField(unique=True, max_length=50)
+    name = models.CharField(unique=True, max_length=255)
 
     def __str__(self) -> str:
         return self.name
@@ -17,7 +17,7 @@ class ManufacturerNamesModel(models.Model):
 class CarTypesModel(models.Model):
     '''Representing car models like X5, Swift, Yaris'''
     manufacturer = models.ForeignKey(ManufacturerNamesModel, on_delete=models.CASCADE)
-    name = models.CharField(unique=True, max_length=255)
+    name = models.CharField(max_length=255)
 
     def __str__(self) -> str:
         return self.manufacturer.name + ' ' + self.name
@@ -60,7 +60,7 @@ class CarPicturesModel(models.Model):
         img = Image.open(self.picture.path) # Open image using self
         basewidth = 300
 
-        if img.height > 300 or img.width > 300:
+        if img.width > 300:
             wpercent = (basewidth / float(img.size[0]))
             hsize = int((float(img.size[1]) * float(wpercent)))
             img = img.resize((basewidth, hsize), Image.ANTIALIAS)
