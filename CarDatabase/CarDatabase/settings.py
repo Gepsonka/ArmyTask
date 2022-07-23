@@ -14,7 +14,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 import os
 
-config = dotenv_values(".env")
+config = dotenv_values("./.env")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

@@ -10,7 +10,7 @@ echo "==============================="
 echo "Installing python virtualenv..."
 echo "==============================="
 
-if python3 -m pip install --user virtualenv; then
+if python3 -m pip install virtualenv; then
     echo "python3 virtualenv was successfully created"
 else 
     echo "Could not install python3 virtualenv :("
@@ -25,8 +25,8 @@ else
     exit 0
 fi
 
-current_dir = `pwd`
-venv_path = "/venv/source/activate"
+current_dir=`pwd`
+venv_path="/venv/bin/activate"
 
 if source $current_dir$venv_path; then
     echo "venv started successfully"
@@ -40,11 +40,12 @@ echo "=========================="
 echo "Installing dependencies..."
 echo "=========================="
 
-if python3 -m pip install requirements.txt; then
+if python3 -m pip install -r requirements.txt; then
     echo "Dependencies are installed."
 else 
     echo "Could not install dependencies :("
     exit 0
+fi
 
 echo "====================="
 echo "Creating .env file..."
@@ -77,7 +78,7 @@ CustomUser.objects.create_superuser(
 ).save()
 EOF
 
-if python3 -c "$python_cmd"; then
+if python3 manage.py shell -c "$python_cmd"; then
     echo ""
 else
     echo "Could not create superuser :("
@@ -98,7 +99,3 @@ echo "===================================================================="
 echo "you can start the server with the runserver.sh script"
 
 echo "Have fun examining the application :D!"
-
-
-
-
