@@ -10,6 +10,7 @@
 {% block content %}
 <main class="container-fluid p-4" style="min-height: 100vh;">
     {% include 'messages.html' %}
+    <h2 style="text-align: center;">Favourite Cars</h2>
     <form class="form-field row" action="{% url 'car-favourite-cars-list' %}" method="POST">
         {% csrf_token %}
         <div class="col-lg-3 col-sm-10 mb-2 p-0">
