@@ -13,8 +13,8 @@
     </div>
     {% endif %}
     <form method="POST">
+        {% csrf_token %}
         <div class="form-group"></div>
-            {% csrf_token %}
             <legend class="text-center">Join us!</legend>
             <fieldset>
                 {{ form | crispy}}

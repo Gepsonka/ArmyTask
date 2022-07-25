@@ -5,8 +5,8 @@
     <div class="row justify-content-center">
         <div class="col-lg-6 col-sm-10 p-3">
             <form method="POST">
+                {% csrf_token %}
                 <div class="form-group"></div>
-                    {% csrf_token %}
                     <legend class="text-center">Create user</legend>
                     <fieldset>
                         {{ form | crispy}}

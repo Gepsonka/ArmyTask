@@ -8,8 +8,8 @@
         <div class="col-lg-6 col-sm-10 p-3">
             
             <form method="POST">
+                {% csrf_token %}
                 <div class="form-group"></div>
-                    {% csrf_token %}
                     <legend class="text-center">Add to favourites</legend>
                     <span style="display:block; text-align: center;">manufacturer: {{ car_type.manufacturer.name }}, model: {{ car_type.name }}</span>
                     <fieldset>
