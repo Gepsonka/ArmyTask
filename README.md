@@ -10,6 +10,7 @@ Author: Molnár Botond
 
 Github: https://github.com/Gepsonka/ArmyTask
 
+A project letölthető a github linken elérhető releasekről.
 
 
 ## Telepítési útmutató:
