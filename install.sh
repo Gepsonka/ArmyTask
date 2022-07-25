@@ -118,5 +118,3 @@ echo "You can generate django secret on this site:"
 echo "https://djecrety.ir/"
 echo "===================================================================="
 echo "you can start the server with the runserver.sh script"
-
-echo "Have fun examining the application :D!"

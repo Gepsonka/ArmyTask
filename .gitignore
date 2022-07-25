@@ -131,14 +131,9 @@ dmypy.json
 # Exclude media files
 CarDatabase/media/cars/*
 
-# Exclude migration files
-CarDatabase/AdminAuth/migrations/*initial.py
-CarDatabase/AdminSite/migrations/*initial.py
-CarDatabase/Auth/migrations/*initial.py
-CarDatabase/CarData/migrations/*initial.py
-CarDatabase/CustomUser/migrations/*initial.py
-
+# Excluding database
 CarDatabase/db.sqlite3
 
+# Exluding .env file
 CarDatabase/.env
 

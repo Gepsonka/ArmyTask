@@ -51,13 +51,13 @@ Sikeres telepítés után futassa a szervert a runserver.sh script segítségév
  <környezet_neve>/Scripts/activate
  ```
 
- Telepítse a projekt függőségeket:
+ Telepítse a függőségeket:
 
  ```bash
  python3 -m pip install -r requirements.txt
  ```
 
- Hozzon létre egy .env fájlt a CarDatabase mappába (nem abba, ahol a settings.py van), ahova beilleszti a következőt:
+ Hozzon létre egy .env fájlt a CarDatabase mappába (nem abba, ahol a settings.py van), ahova bemásolja a következőt:
 
  ```
  DJANGO_SECRET=q_l$q-x@bea68#zogx=wmsr7ix(7rs@@vqmb+@ks&ur7b&((ob 
