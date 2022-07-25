@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'CarData',
     'Auth',
     'CustomUser',
-    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -165,8 +164,3 @@ MEDIA_URL = '/media/'
     
 # Path where media is stored  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  
-
-
-GRAPH_MODELS ={
-    'app_labels': ['AdminSite', 'Auth', 'CarData', 'CustomUser']
-}
