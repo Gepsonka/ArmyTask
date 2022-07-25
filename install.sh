@@ -81,11 +81,11 @@ echo "==================================="
 read -p 'Username: ' uservar
 read -sp 'Password: ' passwdvar
 
-if [ ! "$uservar"]; then
+if [ ! "$uservar" ]; then
     uservar="admin"
 fi
 
-if [ ! "$passwdvar"]; then
+if [ ! "$passwdvar" ]; then
     passwdvar="admin"
 fi
 
